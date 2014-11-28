@@ -69,7 +69,7 @@ public class Language {
 	 @return the input word in actual language
 	 @prints nothing
 	 */
-	public String word(String input) {
+	public String t(String input) {
 		String ret = dictionary.get(input);
 		if (ret == null)
 			ret = input;

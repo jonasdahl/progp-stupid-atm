@@ -1,5 +1,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.text.DateFormat;
+import java.util.Date;
 
 /**
  * The server class of the ATM system. TODO Complete
@@ -42,9 +44,11 @@ public class ATMServer {
     /**
      * Prints the parameter to stdout.
      * @prints the parameter to stdout
-     * @param logStr the string to be logged to stdout
+     * @param logStr the string to be logged to stdout, with timestamp
      */
     public static void log(String logStr) {
-    	System.out.println(logStr);
+    	Date now = new Date();
+    	DateFormat df = DateFormat.getTimeInstance();
+    	System.out.println(df.format(now) + ": " +logStr);
     }
 }

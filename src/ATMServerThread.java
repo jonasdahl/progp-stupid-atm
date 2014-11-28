@@ -31,7 +31,7 @@ public class ATMServerThread extends Thread {
 	private final static String ERROR = "E ";
 	private final static String AUTH_ERROR = ERROR + 1;
 	private final static String INACTIVE_ERROR = ERROR + 2;
-	private final static int TIMEOUT_TIME = 30;	// Minutes
+	private final static int TIMEOUT_TIME = 1;	// Minutes
 	private final static int STATUS_OK = 1;
 	
 	
@@ -72,14 +72,11 @@ public class ATMServerThread extends Thread {
      * @throws IOException if error occurs on read (se BufferedReader docs).
      */
     private String readLine() throws IOException {
-    	String str = "";
-    	try {
-    		str = in.readLine();
-            ATMServer.log(""  + socket + " : " + str);
-    	} catch (NullPointerException e) {
-    		ATMServer.log("Client disappered.");
+    	String str;
+    	while ((str = in.readLine()) != null) {
+            return str;
     	}
-        return str;
+    	return null;
     }
 
     /**
@@ -96,35 +93,48 @@ public class ATMServerThread extends Thread {
             while (listening) {
                 // TODO Send menu to client?
                 inputLine = readLine();	// Reads input from client
+                if (inputLine == null)
+                	break;
                 switch (inputLine) {
                 case LOGIN:
+                	ATMServer.log("Login requested.");
                 	String cardNumber = readLine();
                 	String pinCode = readLine();
                 	int response = verify(cardNumber, pinCode);
                 	if (response > 0) {
                 		out.println(response);
                     	this.lastActivity = new Date();
+                    	ATMServer.log("Login successful.");
                 	} else {
                 		out.println(AUTH_ERROR);
+                    	ATMServer.log("Login error.");
                 	}
                     break;
                 case BALANCE:
+                	ATMServer.log("Balance requested.");
                 	if (active()) {
                 		out.println(getBalance());
+                    	ATMServer.log("Balance sent.");
                 	} else {
                 		out.println(INACTIVE_ERROR);
+                    	ATMServer.log("User inactive, no balance sent.");
                 	}
                     break;
-                case WITHDRAW:
-                	String code = readLine();
+                case WITHDRAW: 
+                	ATMServer.log("Withdraw requested.");
+                	String code = readLine(); // TODO Check in list of two-digit passphrases
                 	String amount = readLine();
                 	if (active()) {
-                		out.println(withdraw(amount));
+                		int result = withdraw(amount);
+                		out.println(result);
+                    	ATMServer.log("Withdraw maybe successful (" + result + ").");
                 	} else {
                 		out.println(INACTIVE_ERROR);
+                    	ATMServer.log("User inactive, withdraw not accepted.");
                 	}
                     break;
                 case DEPOSIT:
+                	// TODO
                     break;
                 case EXIT:
                 	listening = false;
@@ -137,17 +147,19 @@ public class ATMServerThread extends Thread {
         } catch (IOException e){
             e.printStackTrace();
         }
-    
+        ATMServer.log("Client disconnected.");
     }
     
     /**
      * TODO HELA FUNKTIONEN
      * @param cardNumber
      * @param pinCode
-     * @return 1 on succes, 0 on fail
+     * @return 1 on success, 0 on fail
      */
     private int verify(String cardNumber, String pinCode) {
-    	return 1;
+    	if (cardNumber.equals("123456") && pinCode.equals("1234"))
+    		return 1;
+    	return 0;
     }
     
     /**
@@ -171,7 +183,7 @@ public class ATMServerThread extends Thread {
     }
     
     /**
-     * TODO HELA FUNKTIONEN
+     * TODO HELA FUNKTIONEN. VI SPARAR MONEYZ I ÖREN (INTS/LONGS/SHORTS/T-SHIRTS) OK, SÅ SLIPPER VI FLOATS OCH ATT PENGAR KAN BLI 1345,343453453424334657687564343 kr.
      * @param sessionId
      * @return the amount of money on the customer's account * 100 (159,59 kr is 15959)
      */
