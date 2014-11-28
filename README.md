@@ -1,4 +1,5 @@
-StupidATM
+Stupid ATM
 =========
+Yeah, it's really stupid.
 
-INET 
+A school project by Nick Nyman and Jonas Dahl.
