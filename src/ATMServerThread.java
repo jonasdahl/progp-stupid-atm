@@ -72,8 +72,13 @@ public class ATMServerThread extends Thread {
      * @throws IOException if error occurs on read (se BufferedReader docs).
      */
     private String readLine() throws IOException {
-        String str = in.readLine();
-        ATMServer.log(""  + socket + " : " + str);
+    	String str = "";
+    	try {
+    		str = in.readLine();
+            ATMServer.log(""  + socket + " : " + str);
+    	} catch (NullPointerException e) {
+    		ATMServer.log("Client disappered.");
+    	}
         return str;
     }
 
