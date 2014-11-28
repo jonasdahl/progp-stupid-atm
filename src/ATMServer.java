@@ -2,9 +2,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 /**
-   @author Jonas Dahl & Nick Nyman
-   @version 1.0
-   @date 2014-11-28
+ * The server class of the ATM system. TODO Complete
+ * @author Jonas Dahl & Nick Nyman
+ * @version 1.0
+ * @date 2014-11-28
 */
 public class ATMServer {
 	/**
