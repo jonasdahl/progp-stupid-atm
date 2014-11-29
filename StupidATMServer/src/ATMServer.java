@@ -4,7 +4,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 /**
- * The server class of the ATM system. TODO Complete
+ * The server class of the ATM system. TODO Complete description
  * @author Jonas Dahl & Nick Nyman
  * @version 1.0
  * @date 2014-11-28
