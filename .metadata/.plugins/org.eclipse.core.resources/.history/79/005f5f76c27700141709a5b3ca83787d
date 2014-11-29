@@ -1,0 +1,16 @@
+/**
+ * A class for a bank account
+ * @author Jonas Dahl & Nick Nyman
+ * @version 1.0
+ * @date 2014-11-29
+ */
+public class Account {
+	private int id;
+	private String personalID;
+	private String name;
+	private String cardNumber;
+	
+	public Account() {
+		
+	}
+}

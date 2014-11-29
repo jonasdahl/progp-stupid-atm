@@ -14,45 +14,32 @@ import java.util.Date;
  * @date 2014-11-28
  */
 public class ATMServerThread extends Thread {
-	/**
-	 * The name of the thread.
-	 */
-	private static String threadName = "ATMServerThread";
+	/** The name of the thread. */
+	private final static String threadName = "ATMServerThread";
 	
-	/**
-	 * Some constants.
-	 */
+	/** Some constants for receiving from client. */
 	private final static String LOGIN = "L";
 	private final static String BALANCE = "B";
 	private final static String WITHDRAW = "W";
 	private final static String DEPOSIT = "D";
 	private final static String EXIT = "Q";
 
+	/** Other constants, errors. */
 	private final static String ERROR = "E ";
 	private final static String AUTH_ERROR = ERROR + 1;
 	private final static String INACTIVE_ERROR = ERROR + 2;
-	private final static int TIMEOUT_TIME = 1;	// Minutes
+	
+	/** Other constants, status codes. */
+	private final static int TIMEOUT_TIME = 1;	// In minutes
 	private final static int STATUS_OK = 1;
 	
-	
-	/**
-	 * Holds the socket so we always have the connection to client.
-	 */
+	/** Holds the socket so we always have the connection to client. */
     private Socket socket = null;
-    
-    /**
-     * The reader, where we get things the client sends us.
-     */
+    /** The reader, where we get things the client sends us. */
     private BufferedReader in;
-    
-    /**
-     * The writer, where we can send something and it'll fly away to the client.
-     */
+    /** The writer, where we can send something and it'll fly away to the client. */
     PrintWriter out;
-
-	/**
-	 * Saves the date for the last activity.
-	 */
+    /** Saves the date for the last activity. */
 	private Date lastActivity;
 	
     /**
@@ -74,6 +61,7 @@ public class ATMServerThread extends Thread {
     private String readLine() throws IOException {
     	String str;
     	while ((str = in.readLine()) != null) {
+    		ATMServer.log("Read line '" + str + "'");
             return str;
     	}
     	return null;
@@ -81,60 +69,30 @@ public class ATMServerThread extends Thread {
 
     /**
      * The run method is invoked when thread starts, ie when the client connects.
-     * @prints TODO :)
+     * Starts a loop that checks incoming input.
+     * @prints logs about client status, like when connected, disconnected and so on TODO :)
      */
     public void run() {
         try {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader
                 (new InputStreamReader(socket.getInputStream()));
-            String inputLine, outputLine, sessionId;
+            String inputLine;
             boolean listening = true;
             while (listening) {
-                // TODO Send menu to client?
                 inputLine = readLine();	// Reads input from client
-                if (inputLine == null)
-                	break;
                 switch (inputLine) {
                 case LOGIN:
-                	ATMServer.log("Login requested.");
-                	String cardNumber = readLine();
-                	String pinCode = readLine();
-                	int response = verify(cardNumber, pinCode);
-                	if (response > 0) {
-                		out.println(response);
-                    	this.lastActivity = new Date();
-                    	ATMServer.log("Login successful.");
-                	} else {
-                		out.println(AUTH_ERROR);
-                    	ATMServer.log("Login error.");
-                	}
+                	handleLogin();
                     break;
                 case BALANCE:
-                	ATMServer.log("Balance requested.");
-                	if (active()) {
-                		out.println(getBalance());
-                    	ATMServer.log("Balance sent.");
-                	} else {
-                		out.println(INACTIVE_ERROR);
-                    	ATMServer.log("User inactive, no balance sent.");
-                	}
+                	handleBalance();
                     break;
                 case WITHDRAW: 
-                	ATMServer.log("Withdraw requested.");
-                	String code = readLine(); // TODO Check in list of two-digit passphrases
-                	String amount = readLine();
-                	if (active()) {
-                		int result = withdraw(amount);
-                		out.println(result);
-                    	ATMServer.log("Withdraw maybe successful (" + result + ").");
-                	} else {
-                		out.println(INACTIVE_ERROR);
-                    	ATMServer.log("User inactive, withdraw not accepted.");
-                	}
+                	handleWithdraw();
                     break;
                 case DEPOSIT:
-                	// TODO
+                	handleDeposit();
                     break;
                 case EXIT:
                 	listening = false;
@@ -145,16 +103,16 @@ public class ATMServerThread extends Thread {
             in.close();
             socket.close();
         } catch (IOException e){
-            e.printStackTrace();
+            ATMServer.log("An error occurred when listening to socket.");
         }
         ATMServer.log("Client disconnected.");
     }
     
     /**
      * TODO HELA FUNKTIONEN
-     * @param cardNumber
-     * @param pinCode
-     * @return 1 on success, 0 on fail
+     * @param cardNumber card number to verify
+     * @param pinCode pin code to verify
+     * @return Member id > 0 on success, 0 on fail
      */
     private int verify(String cardNumber, String pinCode) {
     	if (cardNumber.equals("123456") && pinCode.equals("1234"))
@@ -163,22 +121,25 @@ public class ATMServerThread extends Thread {
     }
     
     /**
-     * Checks if session is active.
-     * @return true if session is active, false else
+     * Checks if session is active, ie if date was set less than TIMEOUT_TIME mins ago.
+     * @prints logs when new activation time is set
+     * @return true if session is active, false otherwise
      */
     private boolean active() {
-    	if (lastActivity == null)
+    	if (lastActivity == null) // There isn't even a login back in time!
     		return false;
+    	
     	Date now = new Date();
-    	Calendar cal = Calendar.getInstance(); // Creates calendar
-        cal.setTime(now); // Sets calendar to now
-        cal.add(Calendar.MINUTE, -TIMEOUT_TIME); // Adds timeout
-        Date nowMinusTimeout = cal.getTime(); // returns new date object, one hour in the future
+    	Calendar cal = Calendar.getInstance();
+        cal.setTime(now); 
+        cal.add(Calendar.MINUTE, -TIMEOUT_TIME); // Cal is now TIMEOUT mins back in time!
+        Date nowMinusTimeout = cal.getTime();
         Date lastActivity = this.lastActivity;
     	
-        this.lastActivity = now;	// Update last activity, this is an activity
-    	if (nowMinusTimeout.compareTo(lastActivity) < 0)
+    	if (nowMinusTimeout.compareTo(lastActivity) < 0) {
+            this.lastActivity = now;	// Update last activity, because this is an activity
     		return true;
+    	}
     	return false;
     }
     
@@ -194,5 +155,49 @@ public class ATMServerThread extends Thread {
     // TODO Parse int, do the withdraw, return status code
     private int withdraw(String amount) {
     	return STATUS_OK;
+    }
+    
+    private void handleLogin() throws IOException {
+    	ATMServer.log("Login requested.");
+    	String cardNumber = readLine();
+    	String pinCode = readLine();
+    	int response = verify(cardNumber, pinCode);
+    	if (response > 0) {
+    		out.println(response);
+        	this.lastActivity = new Date();
+        	ATMServer.log("Login successful.");
+    	} else {
+    		out.println(AUTH_ERROR);
+        	ATMServer.log("Login error.");
+    	}
+    }
+    
+    private void handleBalance() {
+    	ATMServer.log("Balance requested.");
+    	if (active()) {
+    		out.println(getBalance());
+        	ATMServer.log("Balance sent.");
+    	} else {
+    		out.println(INACTIVE_ERROR);
+        	ATMServer.log("User inactive, no balance sent.");
+    	}
+    }
+    
+    private void handleWithdraw() throws IOException {
+    	ATMServer.log("Withdraw requested.");
+    	String code = readLine(); // TODO Check in list of two-digit passphrases
+    	String amount = readLine();
+    	if (active()) {
+    		int result = withdraw(amount);
+    		out.println(result);
+        	ATMServer.log("Withdraw maybe successful (" + result + ").");
+    	} else {
+    		out.println(INACTIVE_ERROR);
+        	ATMServer.log("User inactive, withdraw not accepted.");
+    	}
+    }
+    
+    private void handleDeposit() {
+    	// TODO
     }
 }
