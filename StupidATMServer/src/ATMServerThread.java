@@ -145,7 +145,7 @@ public class ATMServerThread extends Thread {
     
     /**
      * TODO HELA FUNKTIONEN. VI SPARAR MONEYZ I ÖREN (INTS/LONGS/SHORTS/T-SHIRTS) OK, SÅ SLIPPER VI FLOATS OCH ATT PENGAR KAN BLI 1345,343453453424334657687564343 kr.
-     * class Account ansvarar för conversion -> kr, allt denna behöver göra är anropa rätt Account's getBalance()
+     * - Class Account ansvarar för conversion -> kr, allt denna behöver göra är anropa rätt Account's getBalance()
      * @param sessionId
      * @return the amount of money on the customer's account * 100 (159,59 kr is 15959)
      */
@@ -178,6 +178,7 @@ public class ATMServerThread extends Thread {
     	}
     }
     
+    // TODO: behöver också skicka Account info så att få rätt användares balance 
     private void handleBalance() {
     	ATMServer.log("Balance requested.");
     	if (active()) {
