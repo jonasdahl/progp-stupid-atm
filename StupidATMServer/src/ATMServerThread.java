@@ -197,7 +197,18 @@ public class ATMServerThread extends Thread {
     	}
     }
     
-    private void handleDeposit() {
-    	// TODO
+    // TODO: Gör om gör rätt
+    private void handleDeposit() throws IOException {
+    	ATMServer.log("Withdraw requested.");
+    	String code = readLine(); // TODO Check in list of two-digit passphrases
+    	String amount = readLine();
+    	if (active()) {
+    		int result = withdraw(amount);
+    		out.println(result);
+        	ATMServer.log("Withdraw maybe successful (" + result + ").");
+    	} else {
+    		out.println(INACTIVE_ERROR);
+        	ATMServer.log("User inactive, withdraw not accepted.");
+    	}
     }
 }
