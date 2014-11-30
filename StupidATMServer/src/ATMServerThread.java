@@ -157,6 +157,11 @@ public class ATMServerThread extends Thread {
     	return STATUS_OK;
     }
     
+    // TODO Parse int, do the depositw, return status code
+    private int deposit(String amount) {
+    	return STATUS_OK;
+    }
+    
     private void handleLogin() throws IOException {
     	ATMServer.log("Login requested.");
     	String cardNumber = readLine();
@@ -199,16 +204,16 @@ public class ATMServerThread extends Thread {
     
     // TODO: Gör om gör rätt
     private void handleDeposit() throws IOException {
-    	ATMServer.log("Withdraw requested.");
+    	ATMServer.log("Deposit requested.");
     	String code = readLine(); // TODO Check in list of two-digit passphrases
     	String amount = readLine();
     	if (active()) {
-    		int result = withdraw(amount);
+    		int result = deposit(amount);
     		out.println(result);
-        	ATMServer.log("Withdraw maybe successful (" + result + ").");
+        	ATMServer.log("Deposit maybe successful (" + result + ").");
     	} else {
     		out.println(INACTIVE_ERROR);
-        	ATMServer.log("User inactive, withdraw not accepted.");
+        	ATMServer.log("User inactive, deposit not accepted.");
     	}
     }
 }
