@@ -145,6 +145,7 @@ public class ATMServerThread extends Thread {
     
     /**
      * TODO HELA FUNKTIONEN. VI SPARAR MONEYZ I ÖREN (INTS/LONGS/SHORTS/T-SHIRTS) OK, SÅ SLIPPER VI FLOATS OCH ATT PENGAR KAN BLI 1345,343453453424334657687564343 kr.
+     * class Account ansvarar för conversion -> kr, allt denna behöver göra är anropa rätt Account's getBalance()
      * @param sessionId
      * @return the amount of money on the customer's account * 100 (159,59 kr is 15959)
      */
@@ -157,7 +158,7 @@ public class ATMServerThread extends Thread {
     	return STATUS_OK;
     }
     
-    // TODO Parse int, do the depositw, return status code
+    // TODO Parse int, do the deposit, return status code
     private int deposit(String amount) {
     	return STATUS_OK;
     }
@@ -202,7 +203,7 @@ public class ATMServerThread extends Thread {
     	}
     }
     
-    // TODO: Gör om gör rätt
+    // TODO: Gör om gör rätt, detta är bara en kopia av withdraw.
     private void handleDeposit() throws IOException {
     	ATMServer.log("Deposit requested.");
     	String code = readLine(); // TODO Check in list of two-digit passphrases
