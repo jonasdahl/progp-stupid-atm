@@ -16,7 +16,7 @@ public class ATMClient {
     private static Language t;
     
     public static void main(String[] args) throws IOException {
-    	t = new Language();
+    	t = new Language("svSE");
         Socket socket = null;
         PrintWriter out = null;
         BufferedReader in = null;
@@ -37,7 +37,7 @@ public class ATMClient {
         String line;
         boolean cont = true;
         while (cont) {
-        	System.out.println(t.t("Right now, you can choose between (1) login, (2) withdraw, (3) show balance, (4) quit, (5) change language.")); // TODO
+        	System.out.println(t.t("Right now, you can choose between.\n(1) login,\n(2) withdraw,\n(3) show balance,\n(4) quit,\n(5) change language.")); // TODO
         	line = stdIn.readLine();
         	if (line == null) 
         		break;
