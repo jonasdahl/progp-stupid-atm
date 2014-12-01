@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 
 /**
@@ -76,9 +77,8 @@ public class Account {
 	 * NB: database stores value in Ören so balance must
 	 * be converted to Kr before being presented to the client.
 	 */
-	public double getBalance(){
-		double value = 133767;//TODO: parse db
-		return (value/100); //Because value is stored in ören (yes, ÖREN!! ÖREN!!)
+	public int getBalance() {
+		return balance;
 	}
 	
 	// TODO Setters. If we want to update something, we also have to update the database file!
@@ -86,16 +86,56 @@ public class Account {
 	/**
 	 * Updates the balance in the account and the database
 	 * @param addValue the deposited
+	 * @throws IOException 
 	 */
-	public void setDepositBalance(int addValue){
+	public void deposit(int addValue) throws IOException {
 		this.balance = this.balance + addValue;
+		
+		String fileText = "";
+	    BufferedReader br = null;
+	    try {
+			br = new BufferedReader(new FileReader("src/accounts.txt"));
+	        StringBuilder sb = new StringBuilder();
+	        String line = br.readLine();
+	        while (line != null) {
+	            String[] parts = line.split("\\|");
+	            if (parts.length == 6) {
+	            	if (parts[0].trim().equals("" + id)) {
+	            		line = id + " | " + personalID + " | " + name + " | " + cardNumber + " | " + pinCode + " | " + balance;
+	            	}
+	            }
+	            sb.append(line);
+	            sb.append("\n");
+	            line = br.readLine();
+	        }
+	        fileText = sb.toString();
+	    	br.close();
+	    	PrintWriter writer = new PrintWriter("src/accounts.txt", "UTF-8");
+	    	writer.print(fileText);
+	    	writer.close();
+	    } catch(IOException e) {
+	    	ATMServer.log("Database read failed:");
+	    	ATMServer.log(e.getMessage());
+	    	throw new IOException();
+	    } 
+	    
 		//TODO: change balance in db
 	}
 	/**
 	 * Considers a withdraw a negative deposit
 	 * @param withdrawn amount
+	 * @throws IOException 
 	 */
-	public void setWithdrawBalance(int withdrawn){
-		setDepositBalance(0-withdrawn);
+	public int withdraw(int withdrawn) throws IOException{
+		if (balance < withdrawn)
+			return -1;
+		deposit(0-withdrawn);
+		return balance;
+	}
+	
+	public boolean isSet() {
+		if (id > 0)
+			return true;
+		return false;
 	}
 }

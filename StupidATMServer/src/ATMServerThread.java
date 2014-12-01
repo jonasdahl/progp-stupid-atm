@@ -41,6 +41,8 @@ public class ATMServerThread extends Thread {
     PrintWriter out;
     /** Saves the date for the last activity. */
 	private Date lastActivity;
+	/** The actual account. */
+	private Account account;
 	
     /**
      * Constructor. Calls super constructor with a name of the thread and saves the
@@ -155,8 +157,8 @@ public class ATMServerThread extends Thread {
     	ATMServer.log("Login requested.");
     	String cardNumber = readLine();
     	String pinCode = readLine();
-    	Account acc = new Account();
-    	int response = acc.verifyAndLoad(cardNumber, pinCode);
+    	account = new Account();
+    	int response = account.verifyAndLoad(cardNumber, pinCode);
     	if (response > 0) {
     		out.println(response);
         	this.lastActivity = new Date();
@@ -172,7 +174,7 @@ public class ATMServerThread extends Thread {
     private void handleBalance() {
     	ATMServer.log("Balance requested.");
     	if (active()) {
-    		out.println(getBalance());
+    		out.println(account.getBalance());
         	ATMServer.log("Balance sent.");
     	} else {
     		out.println(INACTIVE_ERROR);
@@ -185,7 +187,7 @@ public class ATMServerThread extends Thread {
     	String code = readLine(); // TODO Check in list of two-digit passphrases
     	String amount = readLine();
     	if (active()) {
-    		int result = withdraw(amount);
+    		int result = account.withdraw(Integer.parseInt(amount) * 100); // TODO Accept points
     		out.println(result);
         	ATMServer.log("Withdraw maybe successful (" + result + ").");
     	} else {

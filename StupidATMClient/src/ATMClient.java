@@ -79,7 +79,8 @@ public class ATMClient {
         		if (response.startsWith("E")) {
         			System.out.println(t.t("error"));
         		} else {
-        			System.out.println(t.t("you_have") + " " + ((double)Integer.parseInt(amount)/100) + " " + t.t("in_cash"));
+        			System.out.println(t.t("you_have") + " " + amount + " " + t.t("in_cash"));
+        			System.out.println(t.t("you_have") + " " + ((double)Integer.parseInt(response)/100) + " " + t.t("on_account"));
         		}
         		System.out.print(t.t("enter"));
         		stdIn.readLine();	// Throw away enter
@@ -92,7 +93,7 @@ public class ATMClient {
         		if (response.startsWith("E")) {
         			System.out.println(t.t("error"));
         		} else {
-        			System.out.println(t.t("you_have") + " " + ((double)Integer.parseInt(response)/100) + " " + t.t("on_account"));
+        			System.out.println(t.t("you_have") + " " + ((float)Integer.parseInt(response)/100) + " " + t.t("on_account"));
         		}
         		System.out.print(t.t("enter"));
         		stdIn.readLine();	// Throw away enter
