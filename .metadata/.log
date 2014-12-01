@@ -46,3 +46,6 @@ java.io.FileNotFoundException: /Users/jonas/Documents/StupidATM/.metadata/.plugi
 	at org.eclipse.core.internal.resources.SaveManager.save(SaveManager.java:1109)
 	at org.eclipse.core.internal.resources.DelayedSnapshotJob.run(DelayedSnapshotJob.java:51)
 	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:53)
+
+!ENTRY org.eclipse.jdt.core 4 0 2014-12-01 16:35:44.232
+!MESSAGE Invalid ZIP archive: src/accounts.acc [in StupidATMServer]

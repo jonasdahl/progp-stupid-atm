@@ -79,6 +79,6 @@ public class Language {
 		String ret = dictionary.get(input);
 		if (ret == null)
 			ret = input;
-		return ret;
+		return ret.replaceAll("\\\\n", "\n");
 	}
 }

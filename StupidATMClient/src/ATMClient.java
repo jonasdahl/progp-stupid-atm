@@ -27,17 +27,18 @@ public class ATMClient {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             stdIn = new BufferedReader(new InputStreamReader(System.in));
         } catch (UnknownHostException e) {
-            System.err.println(t.t("Don't know about host") + " " + hostName);
+            System.err.println(t.t("unknown_host") + " " + hostName);
             System.exit(1);
         } catch (IOException e) {
-            System.err.println(t.t("Couldn't get I/O for the connection to") + " " + hostName);
+            System.err.println(t.t("no_io") + " " + hostName);
             System.exit(1);
         }
 
         String line;
         boolean cont = true;
         while (cont) {
-        	System.out.println(t.t("Right now, you can choose between.\n(1) login,\n(2) withdraw,\n(3) show balance,\n(4) quit,\n(5) change language.")); // TODO
+            clearScreen();
+        	System.out.println(t.t("menu"));
         	line = stdIn.readLine();
         	if (line == null) 
         		break;
@@ -46,49 +47,63 @@ public class ATMClient {
         	String response;
         	switch (choice) {	// TODO Everything, constants for cases, nicer error handling osv.. =D
         	case 1: //LOGIN
-        		System.out.print("Card number: ");	// Ask for card number
+        		clearScreen();
+        		System.out.println(t.t("login"));
+        		System.out.print(t.t("card_number") + ": ");	// Ask for card number
         		String cardNumber = stdIn.readLine();
-        		System.out.print("Pin code: ");	// Ask for pin code
+        		System.out.print(t.t("pincode") + ": ");	// Ask for pin code
         		String pinCode = stdIn.readLine();
         		out.println("L");	// Send an "L" for login
         		out.println(cardNumber);  // Send card number
         		out.println(pinCode);	  // Send pin code
         		response = in.readLine();
         		if (response.startsWith("E")) {
-        			System.out.println("An error occurred.");
+        			System.out.println(t.t("error"));
         		} else {
-        			System.out.println("You are now logged in.");
+        			System.out.println(t.t("logged_in"));
         		}
+        		System.out.print(t.t("enter"));
+        		stdIn.readLine();	// Throw away enter
         		break;
         	case 2: // Withdraw
-        		System.out.print("Two-digit code: ");	// Ask for code
+        		clearScreen();
+        		System.out.println(t.t("withdraw"));
+        		System.out.print(t.t("two_digit_code") + ": ");	// Ask for code
         		String code = stdIn.readLine();
-        		System.out.print("Amount: ");	// Ask for amount
+        		System.out.print(t.t("amount") + ": ");	// Ask for amount
         		String amount = stdIn.readLine();
         		out.println("W");	// Send a "W" for withdrawal
         		out.println(code);  // Send code
         		out.println(amount);	  // Send amount
         		response = in.readLine();
         		if (response.startsWith("E")) {
-        			System.out.println("An error occurred.");
+        			System.out.println(t.t("error"));
         		} else {
-        			System.out.println("You do now have " + ((double)Integer.parseInt(amount)/100) + " in cash.");
+        			System.out.println(t.t("you_have") + " " + ((double)Integer.parseInt(amount)/100) + " " + t.t("in_cash"));
         		}
+        		System.out.print(t.t("enter"));
+        		stdIn.readLine();	// Throw away enter
         		break;
         	case 3: // Balance
+        		clearScreen();
+        		System.out.println(t.t("balance"));
         		out.println("B");	// Send a "B" for balance
         		response = in.readLine();
         		if (response.startsWith("E")) {
-        			System.out.println(t.t("An error occurred."));
+        			System.out.println(t.t("error"));
         		} else {
-        			System.out.println(t.t("You have") + " " + ((double)Integer.parseInt(response)/100) + " " + t.t("on the account."));
+        			System.out.println(t.t("you_have") + " " + ((double)Integer.parseInt(response)/100) + " " + t.t("on_account"));
         		}
+        		System.out.print(t.t("enter"));
+        		stdIn.readLine();	// Throw away enter
         		break;
-        	case 4: // Balance
+        	case 4: // Quit
+        		clearScreen();
         		out.println("Q");	// Send an "Q" for byebye
         		cont = false;
         		break;
         	case 5: // Change language
+        		clearScreen();
         		System.out.println(t.t("language_question"));	// Ask for language
         		String answer = stdIn.readLine();
         		setLanguage(answer);
@@ -99,5 +114,12 @@ public class ATMClient {
     
     public static void setLanguage(String lang) throws IOException {
     	t = new Language(lang);
+    }
+    
+    public static void clearScreen() {
+    	final String ANSI_CLS = "\u001b[2J";
+        final String ANSI_HOME = "\u001b[H";
+        System.out.print(ANSI_CLS + ANSI_HOME);
+        System.out.flush();
     }
 }   

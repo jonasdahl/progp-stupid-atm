@@ -1,0 +1,14 @@
+menu 				==> Just nu kan du välja mellan:\n(1) logga in,\n(2) ta ut,\n(3) visa saldo,\n(4) avsluta, \n(5) välj språk.
+language_question 	==> Skriv det språk du vill använda. (svSE eller enUS)
+two_digit_code 		==> Tvåsiffrig kod
+amount 				==> Belopp
+unknown_host 		==> Okänd server
+no_io 				==> Kunde inte hitta I/O till
+card_number			==> Kortnummer
+pincode 			==> Pinkod
+error				==> Ett fel uppstod.
+logged_in			==> Du är nu inloggad.
+you_have			==> Du har nu
+in_cash				==> i kontanter.
+on_account			==> på kontot.
+login				==> Logga in
