@@ -1,6 +1,7 @@
-menu 				==> Right now, you can choose between.\n(1) login,\n(2) withdraw,\n(3) show balance,\n(4) quit,\n(5) change language.
+loginpage			==> Welcome to Internet banking! Please type (L) and press enter to login.
+menu 				==> Right now, you can choose between.\n(1) deposit,\n(2) withdrawal,\n(3) show balance,\n(4) quit,\n(5) change language.
 language_question	==> Write the language you want to use. (svSE or enUS)
-two_digit_code 		==> Two-digit code
+two_digit_code 		==> Please enter your two-digit authorization code
 amount 				==> Amount
 unknown_host 		==> Don't know about host
 no_io 				==> Couldn't get I/O for the connection to
@@ -14,5 +15,5 @@ on_account			==> on the account.
 login				==> Log in.
 withdraw			==> Withdraw.
 balance				==> Balance.
-deposit				==> Deposit.
+deposit				==> Deposit an amount.
 enter				==> Push enter to continue.

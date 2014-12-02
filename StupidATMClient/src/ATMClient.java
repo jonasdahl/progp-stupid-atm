@@ -27,7 +27,8 @@ public class ATMClient {
     private static BufferedReader stdIn;
     
     /** Some constants for user input. */
-    private final static int LOGIN = 1;
+    private final static int LOGIN = 0;
+    private final static int DEPOSIT= 1;
     private final static int WITHDRAW = 2;
     private final static int BALANCE = 3;
     private final static int QUIT = 4;
@@ -126,33 +127,36 @@ public class ATMClient {
     public void start() {
     	String line;
         boolean cont = true;
-        while (cont) {
+        while (true) {
             clearScreen();
-        	System.out.println(t.t("menu"));
+        	System.out.println(t.t("loginpage"));
         	line = readLine(stdIn);
         	if (line == null) 
         		break;
-        	
-        	int choice = grabIntFromText(line);
-        	String response;
-        	switch (choice) {	// TODO Everything, constants for cases, nicer error handling osv.. =D
-        	case LOGIN:
-        		login();
-        		break;
-        	case WITHDRAW: 
-        		withdraw();
-        		break;
-        	case BALANCE: // Balance
-        		balance();
-        		break;
-        	case QUIT: // Quit
-        		clearScreen();
-        		out.println("Q");	// Send a "Q" for byebye
-        		cont = false;
-        		break;
-        	case LANGUAGE: // Change language
-        		language();
-        		break;
+        	else login();
+        	while (cont) {
+        		System.out.println(t.t("menu"));
+		    	int choice = grabIntFromText(readLine(stdIn));
+		    	String response;
+		    	switch (choice) {	// TODO Everything, constants for cases, nicer error handling osv.. =D
+		    	case DEPOSIT:
+		    		deposit();
+		    		break;
+		    	case WITHDRAW: 
+		    		withdraw();
+		    		break;
+		    	case BALANCE: // Balance
+		    		balance();
+		    		break;
+		    	case QUIT: // Quit
+		    		clearScreen();
+		    		out.println("Q");	// Send a "Q" for byebye
+		    		cont = false;
+		    		break;
+		    	case LANGUAGE: // Change language
+		    		language();
+		    		break;
+		    	}
         	}
         }
     }
@@ -190,6 +194,32 @@ public class ATMClient {
 			System.out.println(t.t("error"));
 		} else {
 			System.out.println(t.t("logged_in"));
+		}
+		enterToContinue();
+    }
+    /**
+     * Handles deposit.
+     * @prints to stdout: some info and questions about the deposit. 
+     *         to socket: first "D", then the code and amount
+     * @reads from stdin: some answers on questions about the withdrawal
+     * 		  from socket: the response, if the deposit was successful or not
+     */
+    public void deposit() {
+    	clearScreen();
+		System.out.println(t.t("deposit"));
+		System.out.print(t.t("two_digit_code") + ": ");	// Ask for code
+		String code = readLine(stdIn);
+		System.out.print(t.t("amount") + ": ");	// Ask for amount
+		String amount = readLine(stdIn);
+		out.println("D");	// Send a "D" for Deposit
+		out.println(code);  // Send code
+		out.println(amount);	  // Send amount
+		String response = readLine(in);
+		if (response.startsWith("E")) {
+			System.out.println(t.t("error"));
+		} else {
+			System.out.println(t.t("you_have") + " " + amount + " " + t.t("in_cash"));
+			System.out.println(t.t("you_have") + " " + ((double)Integer.parseInt(response)/100) + " " + t.t("on_account"));
 		}
 		enterToContinue();
     }

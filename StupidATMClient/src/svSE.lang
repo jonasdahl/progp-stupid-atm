@@ -1,4 +1,5 @@
-menu 				==> Just nu kan du välja mellan:\n(1) logga in,\n(2) ta ut,\n(3) visa saldo,\n(4) avsluta, \n(5) välj språk.
+loginpage			==> Välkommen till Internetbanken. Tryck (L) följt av enter för att logga in.
+menu 				==> Just nu kan du välja mellan:\n(1) insättning,\n(2) ta ut,\n(3) visa saldo,\n(4) avsluta, \n(5) välj språk.
 language_question 	==> Skriv det språk du vill använda. (svSE eller enUS)
 two_digit_code 		==> Tvåsiffrig kod
 amount 				==> Belopp
