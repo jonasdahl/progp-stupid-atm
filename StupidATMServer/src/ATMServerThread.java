@@ -134,32 +134,6 @@ public class ATMServerThread extends Thread {
     }
     
     
-    // TODO Parse int, do the withdraw, return status code
-    private int withdraw(String amount) throws IOException {
-    	int amountint = Integer.parseInt(amount);
-    	try{
-    		account.withdraw(amountint);
-        	return STATUS_OK;
-    	}catch(IOException e) {
-	    	ATMServer.log("Withdrawal failed:");
-	    	ATMServer.log(e.getMessage());
-	    	throw new IOException();
-    	}
-
-    }
-    
-    // TODO Parse int, do the deposit, return status code
-    private int deposit(String amount) throws IOException {
-    	int amountint = Integer.parseInt(amount);
-    	try{
-    		account.withdraw(amountint);
-        	return STATUS_OK;
-    	}catch(IOException e) {
-	    	ATMServer.log("Deposit failed:");
-	    	ATMServer.log(e.getMessage());
-	    	throw new IOException();
-    	}
-    }
     
     private void handleLogin() throws IOException {
     	ATMServer.log("Login requested.");
@@ -209,7 +183,7 @@ public class ATMServerThread extends Thread {
     	String code = readLine(); // TODO Check in list of two-digit passphrases
     	String amount = readLine();
     	if (active()) {
-    		int result = deposit(amount);
+    		int result = account.deposit(Integer.parseInt(amount)*100); //TODO Accept points
     		out.println(result);
         	ATMServer.log("Deposit maybe successful (" + result + ").");
     	} else {
