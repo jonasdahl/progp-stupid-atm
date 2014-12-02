@@ -1,0 +1,70 @@
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class Hangman {
+	public static void main(String[] args) {
+		String word = "PROGRAMMERA";	// Man kan byta ut ordet
+		String[] parts = word.trim().split(""); // Delar upp strängen i bokstäver, dock blir det första elementet i listan en "tom" bokstav, som vi bortser ifrån senare
+		System.out.println(Arrays.toString(parts)); 
+		
+		Scanner scanner = new Scanner(System.in);
+		
+		String[] answers = new String[word.length() + 6];	// Vi kommer aldrig behöva fler platser eftersom vi max kan ha 6 felgissningar och max hela ordet som rättgissningar
+		int wrongAnswers = 0;
+		String completeWord = "";
+		for (int a = 0; a < answers.length; a++) {
+			completeWord = "";
+			if (wrongAnswers >= 6) {
+				System.out.println("Nu har du gissat fel 6 gånger!");
+				break;
+			}
+			for (int i = 1; i < parts.length; i++) {
+				boolean printed = false;
+				for (int j = 0; j < answers.length; j++) {
+					if (parts[i].equals(answers[j])) {
+						completeWord += answers[j];
+						printed = true;
+					}
+				}
+				if (printed == false) {
+					completeWord += "?";
+				}
+			}
+			System.out.println(completeWord);
+			
+			String letter = scanner.next();
+			
+			boolean found = false;
+			for (String l : answers) {
+				if (l != null && l.equals(letter)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				answers[a] = letter;
+			}
+			
+			boolean correct = false;
+			for (String l : parts) {
+				if (letter != null && !letter.equals(l)) {
+					correct = true;
+					break;
+				}
+			}
+			wrongAnswers++;
+			if (!correct) {
+				wrongAnswers++;
+				System.out.println("Fel.");
+			} else {
+				System.out.println("Rätt.");
+			}
+			System.out.println("Du har " + (6-wrongAnswers) + " försök kvar.");
+		}
+		if (completeWord.equals(word)) {
+			System.out.println("Du vann!");
+		} else {
+			System.out.println("Du förlorade!");
+		}
+	}
+}

@@ -1,0 +1,22 @@
+import java.util.Arrays;
+
+public class Hangman {
+	public static void main(String[] args) {
+		String word = "PROGRAMMERA";	// Man kan byta ut ordet
+		String[] parts = word.trim().split(""); // Delar upp strängen i bokstäver, dock blir det första elementet i listan en "tom" bokstav, som vi bortser ifrån senare
+		System.out.println(Arrays.toString(parts)); 
+		
+		String[] answers = new String[word.length() + 6];	// Vi kommer aldrig behöva fler platser eftersom vi max kan ha 6 felgissningar och max hela ordet som rättgissningar
+		
+		while (true) {
+			for (int i = 1; i < parts.length; i++) {
+				for (int j = 0; j < answers.length; j++) {
+					if (parts[i].equals(answers[j])) {
+						System.out.print(answers[j]);
+					}
+				}
+				System.out.print("?");
+			}
+		}
+	}
+}
