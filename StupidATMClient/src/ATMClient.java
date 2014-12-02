@@ -26,6 +26,13 @@ public class ATMClient {
     /** In-stream from standard in. */
     private static BufferedReader stdIn;
     
+    /** Some constants for user input. */
+    private final static int LOGIN = 1;
+    private final static int WITHDRAW = 2;
+    private final static int BALANCE = 3;
+    private final static int QUIT = 4;
+    private final static int LANGUAGE = 5;
+    
     /**
      * Initializes ATMClient, sets socket, out, in and so on. Exits program if error occurs when
      * initializing those variables and prints some part of 
@@ -57,14 +64,24 @@ public class ATMClient {
     }
     
     /**
+     * Takes care of program initialization. Creates a new ATMClient object and runs it.
+     * @param args not used
+     * @throws IOException 
+     */
+    public static void main(String[] args) {
+    	ATMClient client = new ATMClient();
+    	client.start();   
+    }
+    
+    /**
      * Reads one line (until \n) from standard input. Blocks until there is a line to read.
      * @return the string that has been read
      * @exits if the read gives an IOException
      */
-    private String readLine() {
+    private String readLine(BufferedReader reader) {
     	String line = "";
     	try {
-			line = stdIn.readLine();
+			line = reader.readLine();
 		} catch (IOException e) {
 			System.out.println();
 			System.exit(1);
@@ -104,103 +121,144 @@ public class ATMClient {
     
     /**
      * Runs the client process.
-     * @throws IOException 
      * @prints menu when menu is supposed to be printed.
      */
-    public void start() throws IOException {
+    public void start() {
     	String line;
         boolean cont = true;
         while (cont) {
             clearScreen();
         	System.out.println(t.t("menu"));
-        	line = readLine();
+        	line = readLine(stdIn);
         	if (line == null) 
         		break;
         	
         	int choice = grabIntFromText(line);
         	String response;
         	switch (choice) {	// TODO Everything, constants for cases, nicer error handling osv.. =D
-        	case 1: //LOGIN
-        		clearScreen();
-        		System.out.println(t.t("login"));
-        		System.out.print(t.t("card_number") + ": ");	// Ask for card number
-        		String cardNumber = readLine();
-        		System.out.print(t.t("pincode") + ": ");	// Ask for pin code
-        		String pinCode = readLine();
-        		out.println("L");	// Send an "L" for login
-        		out.println(cardNumber);  // Send card number
-        		out.println(pinCode);	  // Send pin code
-        		response = in.readLine();
-        		if (response.startsWith("E")) {
-        			System.out.println(t.t("error"));
-        		} else {
-        			System.out.println(t.t("logged_in"));
-        		}
-        		System.out.print(t.t("enter"));
-        		stdIn.readLine();	// Throw away enter
+        	case LOGIN:
+        		login();
         		break;
-        	case 2: // Withdraw
-        		clearScreen();
-        		System.out.println(t.t("withdraw"));
-        		System.out.print(t.t("two_digit_code") + ": ");	// Ask for code
-        		String code = stdIn.readLine();
-        		System.out.print(t.t("amount") + ": ");	// Ask for amount
-        		String amount = stdIn.readLine();
-        		out.println("W");	// Send a "W" for withdrawal
-        		out.println(code);  // Send code
-        		out.println(amount);	  // Send amount
-        		response = in.readLine();
-        		if (response.startsWith("E")) {
-        			System.out.println(t.t("error"));
-        		} else {
-        			System.out.println(t.t("you_have") + " " + amount + " " + t.t("in_cash"));
-        			System.out.println(t.t("you_have") + " " + ((double)Integer.parseInt(response)/100) + " " + t.t("on_account"));
-        		}
-        		System.out.print(t.t("enter"));
-        		stdIn.readLine();	// Throw away enter
+        	case WITHDRAW: 
+        		withdraw();
         		break;
-        	case 3: // Balance
-        		clearScreen();
-        		System.out.println(t.t("balance"));
-        		out.println("B");	// Send a "B" for balance
-        		response = in.readLine();
-        		if (response.startsWith("E")) {
-        			System.out.println(t.t("error"));
-        		} else {
-        			System.out.println(t.t("you_have") + " " + ((float)Integer.parseInt(response)/100) + " " + t.t("on_account"));
-        		}
-        		System.out.print(t.t("enter"));
-        		stdIn.readLine();	// Throw away enter
+        	case BALANCE: // Balance
+        		balance();
         		break;
-        	case 4: // Quit
+        	case QUIT: // Quit
         		clearScreen();
-        		out.println("Q");	// Send an "Q" for byebye
+        		out.println("Q");	// Send a "Q" for byebye
         		cont = false;
         		break;
-        	case 5: // Change language
-        		clearScreen();
-        		System.out.println(t.t("language_question"));	// Ask for language
-        		String answer = stdIn.readLine();
-        		setLanguage(answer);
+        	case LANGUAGE: // Change language
+        		language();
         		break;
         	}
         }
     }
     
-    public static void main(String[] args) throws IOException {
-    	ATMClient client = new ATMClient();
-    	client.start();
-        
-    }
-    
-    public static void setLanguage(String lang) throws IOException {
-    	t = new Language(lang);
-    }
-    
+    /**
+     * Clears everything from terminal window on most platforms.
+     * @prints some ascii characters to stdout and flushes.
+     */
     public static void clearScreen() {
     	final String ANSI_CLS = "\u001b[2J";
         final String ANSI_HOME = "\u001b[H";
         System.out.print(ANSI_CLS + ANSI_HOME);
         System.out.flush();
     }
+    
+    /**
+     * Handles login. 
+     * @prints to stdout: clears screen and prints "login" to user, then asks for card number and pincode
+     * 		   to socket: sending "L", card number and pin code to socket
+     * @reads from stdin once after asked for card number and once after asking for pin code
+     * 		  then reads from socket to get response
+     */
+    public void login() {
+    	clearScreen();
+		System.out.println(t.t("login"));
+		System.out.print(t.t("card_number") + ": ");	// Ask for card number
+		String cardNumber = readLine(stdIn);
+		System.out.print(t.t("pincode") + ": ");	// Ask for pin code
+		String pinCode = readLine(stdIn);
+		out.println("L");	// Send an "L" for login
+		out.println(cardNumber);  // Send card number
+		out.println(pinCode);	  // Send pin code
+		String response = readLine(in);
+		if (response.startsWith("E")) {
+			System.out.println(t.t("error"));
+		} else {
+			System.out.println(t.t("logged_in"));
+		}
+		enterToContinue();
+    }
+    
+    /**
+     * Handles withdraw.
+     * @prints to stdout: some info and questions about the withdrawal. 
+     *         to socket: first "W", then the code and amount
+     * @reads from stdin: some answers on questions about the withdrawal
+     * 		  from socket: the response, if the withdrawal was successful or not
+     */
+    public void withdraw() {
+    	clearScreen();
+		System.out.println(t.t("withdraw"));
+		System.out.print(t.t("two_digit_code") + ": ");	// Ask for code
+		String code = readLine(stdIn);
+		System.out.print(t.t("amount") + ": ");	// Ask for amount
+		String amount = readLine(stdIn);
+		out.println("W");	// Send a "W" for withdrawal
+		out.println(code);  // Send code
+		out.println(amount);	  // Send amount
+		String response = readLine(in);
+		if (response.startsWith("E")) {
+			System.out.println(t.t("error"));
+		} else {
+			System.out.println(t.t("you_have") + " " + amount + " " + t.t("in_cash"));
+			System.out.println(t.t("you_have") + " " + ((double)Integer.parseInt(response)/100) + " " + t.t("on_account"));
+		}
+		enterToContinue();
+    }
+    
+    /**
+     * Handles when the user requests balance.
+     * @prints to stdout: info about the state
+     * @reads from socket: the response from the server
+     */
+    private void balance() {
+    	clearScreen();
+		System.out.println(t.t("balance"));
+		out.println("B");	// Send a "B" for balance
+		String response = readLine(in);
+		if (response.startsWith("E")) {
+			System.out.println(t.t("error"));
+		} else {
+			System.out.println(t.t("you_have") + " " + ((float)Integer.parseInt(response)/100) + " " + t.t("on_account"));
+		}
+		enterToContinue();
+    }
+    
+    /**
+     * Handles when the user requests to change language.
+     * @prints to stdout: the language question
+     * @reads from stdin: the language user wants
+     */
+    private void language() {
+    	clearScreen();
+		System.out.println(t.t("language_question"));	// Ask for language
+		String answer = readLine(stdIn);
+		try {
+			t = new Language(answer);
+		} catch (IOException e) {} // TODO Handle error
+    }
+    
+    /**
+     * @prints a text that tells the user to push enter to continue
+     * @reads the enter, or anything to next newline
+     */
+    private void enterToContinue() {
+    	System.out.print(t.t("enter"));
+		readLine(stdIn); // Throw away enter
+	}
 }   
