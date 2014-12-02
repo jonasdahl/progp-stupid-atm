@@ -133,24 +133,32 @@ public class ATMServerThread extends Thread {
     	return false;
     }
     
-    /**
-     * TODO HELA FUNKTIONEN. VI SPARAR MONEYZ I ÖREN (INTS/LONGS/SHORTS/T-SHIRTS) OK, SÅ SLIPPER VI FLOATS OCH ATT PENGAR KAN BLI 1345,343453453424334657687564343 kr.
-     * - Class Account ansvarar för conversion -> kr, allt denna behöver göra är anropa rätt Account's getBalance()
-     * @param sessionId
-     * @return the amount of money on the customer's account * 100 (159,59 kr is 15959)
-     */
-    private int getBalance() {
-    	return 4711;
-    }
     
     // TODO Parse int, do the withdraw, return status code
-    private int withdraw(String amount) {
-    	return STATUS_OK;
+    private int withdraw(String amount) throws IOException {
+    	int amountint = Integer.parseInt(amount);
+    	try{
+    		account.withdraw(amountint);
+        	return STATUS_OK;
+    	}catch(IOException e) {
+	    	ATMServer.log("Withdrawal failed:");
+	    	ATMServer.log(e.getMessage());
+	    	throw new IOException();
+    	}
+
     }
     
     // TODO Parse int, do the deposit, return status code
-    private int deposit(String amount) {
-    	return STATUS_OK;
+    private int deposit(String amount) throws IOException {
+    	int amountint = Integer.parseInt(amount);
+    	try{
+    		account.withdraw(amountint);
+        	return STATUS_OK;
+    	}catch(IOException e) {
+	    	ATMServer.log("Deposit failed:");
+	    	ATMServer.log(e.getMessage());
+	    	throw new IOException();
+    	}
     }
     
     private void handleLogin() throws IOException {
@@ -169,8 +177,7 @@ public class ATMServerThread extends Thread {
     	}
     }
     
-    // TODO: behöver också skicka Account info så att få rätt användares balance 
-    // Ja, när vi kallar getBalance, så
+    // Rätt account när vi kallar account.getBalance().
     private void handleBalance() {
     	ATMServer.log("Balance requested.");
     	if (active()) {
