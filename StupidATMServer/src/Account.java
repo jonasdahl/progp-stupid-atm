@@ -88,7 +88,7 @@ public class Account {
 	 * @param addValue the deposited
 	 * @throws IOException 
 	 */
-	public void deposit(int addValue) throws IOException {
+	public int deposit(int addValue) throws IOException {
 		this.balance = this.balance + addValue;
 		
 		String fileText = "";
@@ -118,6 +118,7 @@ public class Account {
 	    	ATMServer.log(e.getMessage());
 	    	throw new IOException();
 	    } 
+	    return balance;
 	    
 		//TODO: change balance in db
 	}

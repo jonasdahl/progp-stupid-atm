@@ -183,7 +183,7 @@ public class ATMServerThread extends Thread {
     	String code = readLine(); // TODO Check in list of two-digit passphrases
     	String amount = readLine();
     	if (active()) {
-    		int result = account.deposit(Integer.parseInt(amount)*100); //TODO Accept points
+    		int result = account.deposit(Integer.parseInt(amount)*100); //TODO Accept decimals
     		out.println(result);
         	ATMServer.log("Deposit maybe successful (" + result + ").");
     	} else {
