@@ -1,0 +1,22 @@
+loginpage			==> Välkommen till Internetbanken. Tryck enter för att logga in.
+menu 				==> Dina nuvarande val är:\n(1) insättning,\n(2) ta ut,\n(3) visa saldo,\n(4) avsluta, \n(5) välj språk.
+language_question 	==> Skriv det språk du vill använda. (svSE eller enUS)
+two_digit_code 		==> Tvåsiffrig kod
+amount 				==> Belopp
+unknown_host 		==> Okänd server
+no_io 				==> Kunde inte hitta I/O till
+card_number			==> Kortnummer
+pincode 			==> Pinkod
+error				==> Ett fel uppstod.
+logged_in			==> Du är nu inloggad.
+you_have			==> Du har nu
+in_cash				==> i kontanter.
+on_account			==> på kontot.
+login				==> Logga in.
+withdraw			==> Ta ut pengar.
+balance				==> Saldo.
+deposit				==> Sätt in pengar.
+enter				==> Tryck enter för att fortsätta.
+errInvNum			==> Felaktigt nummerformat.
+currency			==> SEK
+inactive_error		==> Ett fel uppstod: du har varit inaktiv för länge.

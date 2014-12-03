@@ -81,4 +81,22 @@ public class Language {
 			ret = input;
 		return ret.replaceAll("\\\\n", "\n");
 	}
+	
+	public String e(String error) {
+		switch (error) {
+		case ATMClient.AUTH_ERROR:
+			return t("auth_error");
+		case ATMClient.INACTIVE_ERROR:
+			return t("inactive_error");
+		case ATMClient.LANG_ERROR:
+			return t("lang_error");
+		case ATMClient.CODE_ERROR:
+			return t("code_error");
+		case ATMClient.BROKE_ERROR:
+			return t("broke_error");
+		case ATMClient.NEGATIVE_ERROR:
+			return t("negative_error");
+		}
+		return t("error");
+	}
 }

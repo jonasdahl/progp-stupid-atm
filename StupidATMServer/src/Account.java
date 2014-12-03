@@ -63,12 +63,10 @@ public class Account {
 	    		cardNumber = Integer.parseInt(parts[3].trim());
 	    		pinCode = Integer.parseInt(parts[4].trim());
 	    		balance = Integer.parseInt(parts[5].trim());
-	    		authcodes = new ArrayList<String>(Arrays.asList("01","03","05","07","09","11","13","15","17","19","21","23","25","27","29")); //TODO: fyll ut listan :)
+	    		authcodes = new ArrayList<String>(Arrays.asList("01","03","05","07","09","11","13","15","17","19","21","23","25","27","29","31","33","35","37","39","41","43","45","47","49","51","53","55","57","59","61","63","65","67","69","71","73","75","77","79","81","83","85","87","89","91","93","95","97","99"));
 	    		return id;
-	    		
 	    	}
 	    }
-
 		ATMServer.log("User not found.");
 		return 0;
 	}
@@ -78,12 +76,11 @@ public class Account {
 	 * @param enteredCode, sent from ServerThread <- Client <- user
 	 * @return boolean value, true if code OK false if not
 	 */
-public boolean authorize(String enteredCode){
-	if(authcodes.contains(enteredCode))
-		return true;
-	else return false;
-}
-	//TODO Getters. Retrieve data from db-file.
+	public boolean authorize(String enteredCode){
+		if(authcodes.contains(enteredCode))
+			return true;
+		else return false;
+	}
 	
 	/**
 	 * Reads current balance from the account database.
@@ -95,16 +92,20 @@ public boolean authorize(String enteredCode){
 		return balance;
 	}
 	
-	// TODO Setters. If we want to update something, we also have to update the database file!
-	
 	/**
 	 * Updates the balance in the account and the database
 	 * @param addValue the deposited
 	 * @throws IOException 
 	 */
-	public int deposit(int addValue) throws IOException {
+	public String deposit(int addValue) {
+		if (addValue < 0)
+			return ATMServerThread.NEGATIVE_ERROR;
 		this.balance = this.balance + addValue;
-		
+		editBalance();
+	    return "" + balance;
+	}
+	
+	private boolean editBalance() {
 		String fileText = "";
 	    BufferedReader br = null;
 	    try {
@@ -130,22 +131,24 @@ public boolean authorize(String enteredCode){
 	    } catch(IOException e) {
 	    	ATMServer.log("Database read failed:");
 	    	ATMServer.log(e.getMessage());
-	    	throw new IOException();
+	    	return false;
 	    } 
-	    return balance;
-	    
-		//TODO: change balance in db
+		return true;
 	}
+	
 	/**
 	 * Considers a withdraw a negative deposit
 	 * @param withdrawn amount
 	 * @throws IOException 
 	 */
-	public int withdraw(int withdrawn) throws IOException{
+	public String withdraw(int withdrawn) throws IOException{
+		if (withdrawn < 0)
+			return ATMServerThread.NEGATIVE_ERROR;
 		if (balance < withdrawn)
-			return -1;
-		deposit(0-withdrawn);
-		return balance;
+			return ATMServerThread.BROKE_ERROR;
+		this.balance = this.balance - withdrawn;
+		editBalance();
+		return "" + balance;
 	}
 	
 	public boolean isSet() {

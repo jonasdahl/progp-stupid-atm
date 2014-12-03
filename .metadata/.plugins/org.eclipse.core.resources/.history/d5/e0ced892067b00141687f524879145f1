@@ -1,0 +1,28 @@
+loginpage			==> Welcome to Internet banking! Please press enter to login.
+menu 				==> Your current options are:\n(1) deposit,\n(2) withdrawal,\n(3) show balance,\n(4) quit,\n(5) change language.
+language_question	==> Please write the language you want to use. (svSE or enUS)
+two_digit_code 		==> Please enter your two-digit authorization code
+amount 				==> Amount
+unknown_host 		==> Don't know about host
+no_io 				==> Couldn't get I/O for the connection to
+card_number			==> Card number
+pincode				==> Pin code
+logged_in			==> You are now logged in.
+you_have			==> You do now have
+in_cash				==> in cash.
+on_account			==> on the account.
+login				==> Log in.
+withdraw			==> Withdraw.
+balance				==> Balance.
+deposit				==> Deposit an amount.
+enter				==> Press enter to continue.
+errInvNum			==> Invalid number entered.
+currency			==> SEK
+language_changed	==> The language was changed.
+error				==> An error occurred.
+inactive_error		==> An error occurred: you have been inactive for too long.
+auth_error			==> An error occurred: invalid card number or pin code.
+lang_error			==> An error occurred: that language is not supported.
+code_error			==> An error occurred: wrong code.
+negative_error		==> An error occurred: you cannot use negative errors here.
+broke_error			==> An error occurred: your balance is too low.
