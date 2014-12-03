@@ -1,6 +1,6 @@
 loginpage			==> Welcome to Internet banking! Please type (L) and press enter to login.
-menu 				==> Right now, you can choose between.\n(1) deposit,\n(2) withdrawal,\n(3) show balance,\n(4) quit,\n(5) change language.
-language_question	==> Write the language you want to use. (svSE or enUS)
+menu 				==> Your current options are:\n(1) deposit,\n(2) withdrawal,\n(3) show balance,\n(4) quit,\n(5) change language.
+language_question	==> Please write the language you want to use. (svSE or enUS)
 two_digit_code 		==> Please enter your two-digit authorization code
 amount 				==> Amount
 unknown_host 		==> Don't know about host
@@ -17,3 +17,4 @@ withdraw			==> Withdraw.
 balance				==> Balance.
 deposit				==> Deposit an amount.
 enter				==> Push enter to continue.
+errInvNum			==> Invalid number entered.

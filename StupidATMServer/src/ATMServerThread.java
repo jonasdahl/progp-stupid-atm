@@ -167,13 +167,18 @@ public class ATMServerThread extends Thread {
     	ATMServer.log("Withdraw requested.");
     	String code = readLine(); // TODO Check in list of two-digit passphrases
     	String amount = readLine();
-    	if (active()) {
+    	if(account.authorize(code)){
+    		if (active()) {
     		int result = account.withdraw(Integer.parseInt(amount) * 100); // TODO Accept points
     		out.println(result);
         	ATMServer.log("Withdraw maybe successful (" + result + ").");
     	} else {
     		out.println(INACTIVE_ERROR);
         	ATMServer.log("User inactive, withdraw not accepted.");
+    		}
+    	} else {
+    		out.println(AUTH_ERROR);
+    		ATMServer.log("User authentication code invalid. Withdrawal denied.");
     	}
     }
     
@@ -182,13 +187,18 @@ public class ATMServerThread extends Thread {
     	ATMServer.log("Deposit requested.");
     	String code = readLine(); // TODO Check in list of two-digit passphrases
     	String amount = readLine();
-    	if (active()) {
-    		int result = account.deposit(Integer.parseInt(amount)*100); //TODO Accept decimals
-    		out.println(result);
-        	ATMServer.log("Deposit maybe successful (" + result + ").");
+    	if(account.authorize(code)){
+	    	if (active()) {
+	    		int result = account.deposit(Integer.parseInt(amount)*100); //TODO Accept decimals
+	    		out.println(result);
+	        	ATMServer.log("Deposit maybe successful (" + result + ").");
+	    	} else {
+	    		out.println(INACTIVE_ERROR);
+	        	ATMServer.log("User inactive, deposit not accepted.");
+	    	}
     	} else {
-    		out.println(INACTIVE_ERROR);
-        	ATMServer.log("User inactive, deposit not accepted.");
+    		out.println(AUTH_ERROR);
+    		ATMServer.log("User authentication code invalid. Deposit denied.");
     	}
     }
 }

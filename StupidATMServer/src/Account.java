@@ -3,6 +3,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.ArrayList;
 
 /**
  * A class for a bank account
@@ -17,6 +18,7 @@ public class Account {
 	private int cardNumber;
 	private int pinCode;
 	private int balance;
+	private static ArrayList<String> authcodes;
 	
 	/**
 	 * Loads user if exists from the database into this object.
@@ -61,7 +63,9 @@ public class Account {
 	    		cardNumber = Integer.parseInt(parts[3].trim());
 	    		pinCode = Integer.parseInt(parts[4].trim());
 	    		balance = Integer.parseInt(parts[5].trim());
+	    		authcodes = new ArrayList<String>(Arrays.asList("01","03","05","07","09","11","13","15","17","19","21","23","25","27","29")); //TODO: fyll ut listan :)
 	    		return id;
+	    		
 	    	}
 	    }
 
@@ -69,6 +73,16 @@ public class Account {
 		return 0;
 	}
 	
+	/**
+	 * Checks whether the entered two-digit authorization code is among the pre-approved ones
+	 * @param enteredCode, sent from ServerThread <- Client <- user
+	 * @return boolean value, true if code OK false if not
+	 */
+public boolean authorize(String enteredCode){
+	if(authcodes.contains(enteredCode))
+		return true;
+	else return false;
+}
 	//TODO Getters. Retrieve data from db-file.
 	
 	/**
