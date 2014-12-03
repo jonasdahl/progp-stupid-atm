@@ -187,11 +187,13 @@ public class ATMClient {
 		System.out.print(t.t("pincode") + ": ");	// Ask for pin code
 		String pinCode = readLine(stdIn);
 		out.println("L");	// Send an "L" for login
+		//TODO: check that input is valid before sending it on
 		out.println(cardNumber);  // Send card number
 		out.println(pinCode);	  // Send pin code
 		String response = readLine(in);
 		if (response.startsWith("E")) {
 			System.out.println(t.t("error"));
+			//TODO: useful output to user in correct language    		
 		} else {
 			System.out.println(t.t("logged_in"));
 		}
@@ -212,11 +214,14 @@ public class ATMClient {
 		System.out.print(t.t("amount") + ": ");	// Ask for amount
 		String amount = readLine(stdIn);
 		out.println("D");	// Send a "D" for Deposit
+		//TODO: check that input is valid before sending it on
+		//TODO: send amounts as ints to guarantee bytesize <10. (1char in string = 1byte)
 		out.println(code);  // Send code
 		out.println(amount);	  // Send amount
 		String response = readLine(in);
 		if (response.startsWith("E")) {
 			System.out.println(t.t("error"));
+			//TODO: useful output to user in correct language
 		} else {
 			System.out.println(t.t("you_have") + " " + amount + " " + t.t("in_cash"));
 			System.out.println(t.t("you_have") + " " + ((double)Integer.parseInt(response)/100) + " " + t.t("on_account"));
@@ -237,13 +242,16 @@ public class ATMClient {
 		System.out.print(t.t("two_digit_code") + ": ");	// Ask for code
 		String code = readLine(stdIn);
 		System.out.print(t.t("amount") + ": ");	// Ask for amount
-		String amount = readLine(stdIn);
+		String amount = readLine(stdIn); 
 		out.println("W");	// Send a "W" for withdrawal
+		//TODO: check that input is valid before sending it on
+		//TODO: send amounts as ints to guarantee bytesize <10. (1char in string = 1byte)
 		out.println(code);  // Send code
 		out.println(amount);	  // Send amount
 		String response = readLine(in);
 		if (response.startsWith("E")) {
 			System.out.println(t.t("error"));
+			//TODO: useful output to user in correct language
 		} else {
 			System.out.println(t.t("you_have") + " " + amount + " " + t.t("in_cash"));
 			System.out.println(t.t("you_have") + " " + ((double)Integer.parseInt(response)/100) + " " + t.t("on_account"));
@@ -263,6 +271,7 @@ public class ATMClient {
 		String response = readLine(in);
 		if (response.startsWith("E")) {
 			System.out.println(t.t("error"));
+			//TODO: useful output to user in correct language
 		} else {
 			System.out.println(t.t("you_have") + " " + ((float)Integer.parseInt(response)/100) + " " + t.t("on_account"));
 		}

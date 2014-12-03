@@ -174,10 +174,12 @@ public class ATMServerThread extends Thread {
         	ATMServer.log("Withdraw maybe successful (" + result + ").");
     	} else {
     		out.println(INACTIVE_ERROR);
+    		//TODO: useful output to user in correct language (should be done in Client)
         	ATMServer.log("User inactive, withdraw not accepted.");
     		}
     	} else {
     		out.println(AUTH_ERROR);
+    		//TODO: useful output to user in correct language (should be done in Client)
     		ATMServer.log("User authentication code invalid. Withdrawal denied.");
     	}
     }
