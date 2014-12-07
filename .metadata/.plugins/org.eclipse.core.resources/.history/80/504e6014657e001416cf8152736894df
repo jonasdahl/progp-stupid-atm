@@ -1,0 +1,303 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.Socket;
+import java.util.Calendar;
+import java.util.Date;
+
+/**
+ * The server thread. One thread for one client connection. Started by the
+ * server when new connection is created. TODO Complete
+ * 
+ * @author Jonas Dahl & Nick Nyman
+ * @version 1.0
+ * @date 2014-11-28
+ */
+public class ATMServerThread extends Thread {
+	/** The name of the thread. */
+	private final static String threadName = "ATMServerThread";
+	/** Holds the socket so we always have the connection to client. */
+	private Socket socket;
+	/** The reader, where we get things the client sends us. */
+	private BufferedReader in;
+	/**
+	 * The writer, where we can send something and it'll fly away to the client.
+	 */
+	private PrintWriter out;
+	/** Saves the date for the last activity. */
+	private Date lastActivity;
+	/** The actual account. */
+	private Account account;
+
+	/**
+	 * Constructor. Calls super constructor with a name of the thread and saves
+	 * the parameter.
+	 * 
+	 * @param socket
+	 *            the socket to the client.
+	 */
+	public ATMServerThread(Socket socket) {
+		super(threadName);
+		this.socket = socket;
+	}
+
+	/**
+	 * Reads one line from the in-reader and returns it as a string. Blocks
+	 * until string is received.
+	 * 
+	 * @return the string on input.
+	 * @prints logs the string to with log function on success.
+	 * @throws IOException
+	 *             if error occurs on read (se BufferedReader docs).
+	 */
+	private String readLine() throws IOException {
+		String str;
+		while ((str = in.readLine()) != null) {
+			ATMServer.log("Read line '" + str + "'");
+			return str;
+		}
+		ATMServer.log("Read null from readLine().");
+		return null;
+	}
+
+	/**
+	 * The run method is invoked when thread starts, ie when the client
+	 * connects. Starts a loop that checks incoming input.
+	 * 
+	 * @prints logs about client status, like when connected, disconnected and
+	 *         so on TODO :)
+	 */
+	public void run() {
+		try {
+			out = new PrintWriter(socket.getOutputStream(), true);
+			in = new BufferedReader(new InputStreamReader(
+					socket.getInputStream()));
+			String inputLine;
+			boolean listening = true;
+			while (listening) {
+				inputLine = readLine(); // Reads input from client
+				if (inputLine == null)
+					break;
+
+				switch (inputLine) {
+				case C.SOCKET_LOGIN:
+					handleLogin();
+					break;
+				case C.SOCKET_BALANCE:
+					handleBalance();
+					break;
+				case C.SOCKET_WITHDRAW:
+					handleWithdraw();
+					break;
+				case C.SOCKET_DEPOSIT:
+					handleDeposit();
+					break;
+				case C.SOCKET_UPDATE:
+					checkVersion();
+					break;
+				case C.SOCKET_EXIT:
+					listening = false;
+					break;
+				}
+			}
+			out.close();
+			in.close();
+			socket.close();
+		} catch (IOException e) {
+			ATMServer.log("An error occurred when listening to socket.");
+		}
+		ATMServer.log("Client disconnected.");
+	}
+
+	/**
+	 * Checks if session is active, ie if date was set less than TIMEOUT_TIME
+	 * mins ago. Also updates session date so that user has TIMEOUT_TIME new
+	 * minutes.
+	 * 
+	 * @prints logs when new activation time is set
+	 * @return true if session is active, false otherwise
+	 */
+	private boolean active() {
+		if (lastActivity == null) // Hey hey hey! There isn't even a login back
+									// in time!
+			return false;
+
+		Date now = new Date();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(now);
+		cal.add(Calendar.MINUTE, -C.TIMEOUT_TIME); // Decreases with timeout
+		Date nowMinusTimeout = cal.getTime();
+		Date lastActivity = this.lastActivity;
+
+		if (nowMinusTimeout.compareTo(lastActivity) < 0) {
+			this.lastActivity = now; // Update last, this is an activity!
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Handles the login on the server side. Reads card number and pin code, and
+	 * there after verifies it with the account object.
+	 * 
+	 * @throws IOException
+	 *             if readLine fails.
+	 */
+	private void handleLogin() throws IOException {
+		ATMServer.log("Login requested.");
+		String cardNumber = readLine();
+		String pinCode = readLine();
+		account = new Account();
+		int response = account.verifyAndLoad(cardNumber, pinCode);
+		if (response > 0) {
+			out.println(response);
+			this.lastActivity = new Date();
+			ATMServer.log("Login successful.");
+		} else {
+			out.println(C.ERROR_AUTHENTICATION);
+			ATMServer.log("Login error.");
+		}
+	}
+
+	/**
+	 * Handles the balance. If user is active, it send the balance, otherwise it
+	 * will send an appropriate error code.
+	 */
+	private void handleBalance() {
+		ATMServer.log("Balance requested.");
+		if (active()) {
+			out.println(account.getBalance());
+			ATMServer.log("Balance sent.");
+		} else {
+			out.println(C.ERROR_INACTIVE);
+			ATMServer.log("User inactive, no balance sent.");
+		}
+	}
+
+	/**
+	 * Handles a withdraw. If user is inactive, it sends inactive error, if code
+	 * is wrong, code error is sent, if withdraw was good, balance is sent. IN
+	 * THAT ORDER OF PRIORITY. YES.
+	 */
+	private void handleWithdraw() throws IOException {
+		ATMServer.log("Withdraw requested.");
+		String code = readLine();
+		String amount = readLine();
+		
+		if (!active()) {
+			out.println(C.ERROR_INACTIVE);
+			ATMServer.log("User inactive, withdraw not accepted.");
+			return;
+		}
+		
+		if (!account.authorize(code)) {
+			out.println(C.ERROR_CODE);
+			ATMServer.log("User authentication code invalid. Withdrawal denied.");
+			return;
+		}
+		
+		String result = account.withdraw(Integer.parseInt(amount));
+		out.println(result);
+		ATMServer.log("Withdraw maybe successful (" + result + ").");
+	}
+
+	/**
+	 * Handles deposit. If user is inactive, inactive error is sent.
+	 * @throws IOException
+	 */
+	private void handleDeposit() throws IOException {
+		ATMServer.log("Deposit requested.");
+		String amount = readLine();
+		if (active()) {
+			String result = account.deposit(Integer.parseInt(amount));
+			out.println(result);
+			ATMServer.log("Deposit maybe successful (" + result + ").");
+		} else {
+			out.println(C.ERROR_INACTIVE);
+			ATMServer.log("User inactive, deposit not accepted.");
+		}
+	}
+
+	private void checkVersion() throws IOException {
+		// First, read version from user
+		String v = readLine();
+		int userVersion = Integer.MAX_VALUE;
+		try {
+			userVersion = Integer.parseInt(v);
+			ATMServer.log("Client's version: " + userVersion + ".");
+		} catch (NumberFormatException e) {
+			ATMServer.log("Client's version value way fucked up: " + v + ".");
+		}
+
+		// Then read latest version from server
+		BufferedReader br = null;
+		int serverVersion = 0;
+		try {
+			br = new BufferedReader(new FileReader("src/version.txt"));
+			String line = br.readLine().trim();
+			br.close();
+			serverVersion = Integer.parseInt(line);
+		} catch (IOException e) {
+			ATMServer.log("Failed to read version file from server.");
+		}
+		ATMServer.log("Server's version: " + serverVersion + ".");
+
+		if (serverVersion > userVersion) {
+			ATMServer.log("User needs to update.");
+			ATMServer.log("Prints '" + STATUS_UPDATE + "' to socket.");
+			out.println(STATUS_UPDATE);
+			ATMServer.log("Prints '" + LANGUAGE + "' to socket.");
+			out.println(LANGUAGE); // Språksektionen börjar
+			printLangFiles();
+			out.println(STATUS_END);
+			out.println(serverVersion);
+			ATMServer.log("Update done.");
+		} else {
+			out.println(STATUS_OK);
+			ATMServer
+					.log("User doesn't need to update, sent one line on socket.");
+		}
+	}
+
+	private void printLangFiles() {
+		File f = new File("src"); // Current directory
+		File[] files = f.listFiles();
+		for (File file : files) {
+			if (file.getName().matches("(.*)\\.lang")) {
+				ATMServer.log("Prints '" + STATUS_FILE + "' to socket.");
+				out.println(STATUS_FILE);
+				ATMServer.log("Prints '" + file.getName() + "' to socket.");
+				out.println(file.getName());
+				printFile(file.getName());
+			}
+		}
+	}
+
+	private void printFile(String name) {
+		try {
+			BufferedReader br = new BufferedReader(
+					new FileReader("src/" + name));
+			String line = null;
+			StringBuilder sb = new StringBuilder();
+			int num = 0;
+			while ((line = br.readLine()) != null) {
+				num++;
+				sb.append(line);
+				sb.append("\n");
+			}
+			String file = sb.toString().trim();
+			ATMServer.log("Prints '" + num + "' to socket.");
+			out.println(num);
+			ATMServer.log("Prints file: '" + name + "' to socket:");
+			out.println(file);
+			br.close();
+		} catch (IOException e) {
+			ATMServer.log("Failed to read file '" + name + "' from server.");
+		}
+	}
+}

@@ -1,0 +1,23 @@
+/**
+ * A class that contains many constants used by both server and client.
+ * @author Jonas Dahl & Nick Nyman
+ * @version 1.0
+ * @date 2014-12-07
+ */
+public class C {
+	/** Error constants. */
+	public final static String ERROR = "E ";
+	public final static String ERROR_AUTHENTICATIOn = ERROR + 1;
+	public final static String ERROR_INACTIVE 		= ERROR + 2;
+	public final static String ERROR_LANGUAGE 		= ERROR + 3;
+	public final static String ERROR_CODE 			= ERROR + 4;
+	public final static String ERROR_NEGATIVE 		= ERROR + 5;
+	public final static String ERROR_BROKE 			= ERROR + 6;
+
+	public final static String STATUS_OK 			= "0";
+	public final static String STATUS_UPDATE 		= "-1";
+	public final static String STATUS_LANGUAGE 	= "-2";
+	public final static String STATUS_FILE 		= "-3";
+	public final static String STATUS_END 			= "-4";
+	public final static String STATUS_EOF 			= "-5";
+}

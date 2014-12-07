@@ -1,0 +1,9 @@
+/**
+ * A class that contains many constants used by both server and client.
+ * @author Jonas Dahl & Nick Nyman
+ * @version 1.0
+ * @date 2014-12-07
+ */
+public class C {
+	
+}

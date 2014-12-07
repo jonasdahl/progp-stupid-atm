@@ -1,0 +1,379 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
+/**
+   @author Jonas Dahl & Nick Nyman.
+   @version 1.0
+   @date 2014-11-28
+*/
+public class ATMClient {
+    /** Some constants for user input. */
+    private final static int DEPOSIT= 1;
+    private final static int WITHDRAW = 2;
+    private final static int BALANCE = 3;
+    private final static int QUIT = 4;
+    private final static int LANGUAGE = 5;
+    
+	/** Specifies port number. */
+    private static int portNumber = 8989;
+    /** Specifies host name. */
+    private static String hostName = "127.0.0.1";
+    /** Stores info about language. */
+    private static Language t;
+    /** Socket to server. */
+    private static Socket socket;
+    /** Out-stream to server. */
+    private static PrintWriter out;
+    /** In-stream from server. */
+    private static BufferedReader in;
+    /** In-stream from standard in. */
+    private static BufferedReader stdIn;
+    /** The current version number. */
+    private static int version;
+    
+    /**
+     * Initializes ATMClient, sets socket, out, in and so on. Exits program if error occurs when
+     * initializing those variables and prints some part of 
+     */
+    public ATMClient() {
+    	this.version = Integer.MAX_VALUE;
+    	try {
+			t = new Language("enUS"); // Default language is English.
+		} catch (IOException e) {
+			System.out.println("An error occurred when reading language file.");
+			System.exit(1);
+		}	
+        socket = null;
+        out = null;
+        in = null;
+        stdIn = null;
+        
+        try {
+            socket = new Socket(hostName, portNumber);
+            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            stdIn = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader versionBR = new BufferedReader(new FileReader("version.txt"));
+            String version = versionBR.readLine();
+            if (version != null) {
+            	this.version = Integer.parseInt(version.trim());
+            }
+        } catch (UnknownHostException e) {
+            System.err.println(t.t("unknown_host") + " " + hostName);
+            System.exit(1);
+        } catch (IOException e) {
+            System.err.println(t.t("no_io") + " " + hostName);
+            System.exit(1);
+        }
+    }
+    
+    /**
+     * Takes care of program initialization. Creates a new ATMClient object and runs it.
+     * @param args not used
+     * @throws IOException 
+     */
+    public static void main(String[] args) {
+    	if (args.length != 2) {
+    		System.out.println("Usage: ATMClient [ipaddress] [port]");
+    		System.out.println("The IP-address and port are to the server.");
+    		System.exit(1);
+    	}
+    	ATMClient client = new ATMClient();
+    	client.start();   
+    }
+    
+    /**
+     * Reads one line (until \n) from standard input. Blocks until there is a line to read.
+     * @return the string that has been read
+     * @exits if the read gives an IOException
+     */
+    private String readLine(BufferedReader reader) {
+    	String line = "";
+    	try {
+			line = reader.readLine();
+		} catch (IOException e) {
+			System.out.println(t.e("error"));
+			System.exit(1);
+		}
+    	return line;
+    }
+
+    /**
+     * Turns text string to double. For example " 443,2" ==> 443.2 or "  44.22  " ==> 44.22
+     * @param text the string to be parsed
+     * @return the double parsed from the string or -1 if the string couldn't be parsed
+     */
+    private double grabDoubleFromText(String text) {
+    	double value = 0;
+    	try {
+    		value = Double.parseDouble(text.trim().replace(',', '.'));
+    	} catch (NumberFormatException e) {
+    		value = -1;
+    	}
+    	return value;
+    }
+
+    /**
+     * Turns text string to int. For example " 443" ==> 443 or "  44.9  " ==> 44
+     * @param text the string to be parsed
+     * @return the double parsed from the string or -1 if the string couldn't be parsed
+     */
+    private int grabIntFromText(String text) {
+    	return (int) grabDoubleFromText(text);
+    }
+    
+    /**
+     * Runs the client process.
+     * Displays the menu to the user.
+     * @prints menu when menu is supposed to be printed.
+     */
+    public void start() {
+    	String line;
+        boolean innerLoop = true, outerLoop = true;
+        while (outerLoop) {
+            clearScreen();
+        	System.out.println(t.t("welcome"));
+        	line = readLine(stdIn);
+        	if (line == null) {
+        		break;
+        	} else {
+				checkVersion();
+        		login();
+        	}
+        	while (innerLoop) {
+        		clearScreen();
+        		System.out.println(t.t("menu"));
+		    	int choice = grabIntFromText(readLine(stdIn));
+		    	switch (choice) {
+		    	case DEPOSIT:
+		    		deposit();
+		    		checkVersion();
+		    		break;
+		    	case WITHDRAW: 
+		    		withdraw();
+		    		checkVersion();
+		    		break;
+		    	case BALANCE: 
+		    		balance();
+		    		checkVersion();
+		    		break;
+		    	case LANGUAGE: // Change language
+		    		language();
+		    		checkVersion();
+		    		break;
+		    	case QUIT:
+		    		clearScreen();
+		    		out.println("Q"); // Send a "Q" for byebye
+		    		cont = false;
+		    		outerLoop = false;
+		    		break;
+		    	}
+        	}
+        }
+    }
+    
+    /**
+     * Clears everything from terminal window on most platforms.
+     * @prints some ascii characters to stdout and flushes.
+     */
+    public static void clearScreen() {
+    	final String ANSI_CLS = "\u001b[2J";
+        final String ANSI_HOME = "\u001b[H";
+        System.out.print(ANSI_CLS + ANSI_HOME);
+        System.out.flush();
+    }
+    
+    /**
+     * Handles login. 
+     * @prints to stdout: clears screen and prints "login" to user, then asks for card number and pincode
+     * 		   to socket: sending "L", card number and pin code to socket
+     * @reads from stdin once after asked for card number and once after asking for pin code
+     * 		  then reads from socket to get response
+     */
+    public void login() {
+    	clearScreen();
+		System.out.println(t.t("login"));
+		System.out.print(t.t("card_number") + ": ");	// Ask for card number
+		String cardNumber = readLine(stdIn);
+		System.out.print(t.t("pincode") + ": ");	// Ask for pin code
+		String pinCode = readLine(stdIn);
+		out.println("L"); 			// Send an "L" for login
+		out.println(cardNumber); 	// Send card number
+		out.println(pinCode); 		// Send pin code
+		String response = readLine(in);
+		if (response.startsWith(C.ERROR)) {
+			System.out.println(t.e(response));  
+			enterToContinue(); 		
+			login(); // Nytt försök
+		} else {
+			System.out.println(t.t("logged_in"));
+			enterToContinue();
+		}
+    }
+    /**
+     * Handles deposit.
+     * @prints to stdout: some info and questions about the deposit. 
+     *         to socket: first "D", then the code and amount
+     * @reads from stdin: some answers on questions about the withdrawal
+     * 		  from socket: the response, if the deposit was successful or not
+     */
+    public void deposit() {
+    	clearScreen();
+		System.out.println(t.t("deposit"));
+		System.out.print(t.t("amount") + ": ");	// Ask for amount
+		int amount = (int) (grabDoubleFromText(readLine(stdIn)) * 100);
+		out.println("D"); 		// Send a "D" for Deposit
+		out.println(amount);	// Send amount
+		String response = readLine(in);
+		if (response.startsWith(ERROR)) {
+			System.out.println(t.e(response));
+		} else {
+			System.out.println(t.t("you_have") + " " + t.t("currency") + " " + ((double)Integer.parseInt(response)/100) + " " + t.t("on_account"));
+		}
+		enterToContinue();
+    }
+    
+    /**
+     * Handles withdraw.
+     * @prints to stdout: some info and questions about the withdrawal. 
+     *         to socket: first "W", then the code and amount
+     * @reads from stdin: some answers on questions about the withdrawal
+     * 		  from socket: the response, if the withdrawal was successful or not
+     */
+    public void withdraw() {
+    	clearScreen();
+		System.out.println(t.t("withdraw"));
+		System.out.print(t.t("two_digit_code") + ": ");	// Ask for code
+		String code = readLine(stdIn);
+		System.out.print(t.t("amount") + ": ");	
+		int amountCents = (int) (grabDoubleFromText(readLine(stdIn)) * 100);
+		out.println("W");			// Send a "W" for withdrawal
+		out.println(code);  		// Send code
+		out.println(amountCents);	// Send amount
+		String response = readLine(in);
+		if (response.startsWith(ERROR)) {
+			System.out.println(t.e(response));
+		} else {
+			System.out.println(t.t("you_have") + " " + t.t("currency") + " " + ((double)amountCents/100) + " " + t.t("in_cash"));
+			System.out.println(t.t("you_have") + " " + t.t("currency") + " " + ((double)Integer.parseInt(response)/100) + " " + t.t("on_account"));
+		}
+		enterToContinue();
+    }
+    
+    /**
+     * Handles when the user requests balance.
+     * @prints to stdout: info about the state
+     * @reads from socket: the response from the server
+     */
+    private void balance() {
+    	clearScreen();
+		System.out.println(t.t("balance"));
+		out.println("B");	// Send a "B" for balance
+		String response = readLine(in);
+		if (response.startsWith(ERROR)) {
+			System.out.println(t.e(response));
+		} else {
+			System.out.println(t.t("you_have") + " " + t.t("currency") + " " + ((float)Integer.parseInt(response)/100) + " " + t.t("on_account"));
+		}
+		enterToContinue();
+    }
+    
+    /**
+     * Handles when the user requests to change language.
+     * @prints to stdout: the language question
+     * @reads from stdin: the language user wants
+     */
+    private void language() {
+    	clearScreen();
+		System.out.println(t.t("language_question"));	// Ask for language
+		String answer = readLine(stdIn);
+		try {
+			t = new Language(answer);
+			System.out.println(t.t("language_changed"));
+		} catch (IOException e) {
+			System.out.println(t.e(LANG_ERROR));
+		}
+		enterToContinue();
+    }
+    
+    /**
+     * @prints a text that tells the user to push enter to continue
+     * @reads the enter, or anything to next newline
+     */
+    private void enterToContinue() {
+    	System.out.print(t.t("enter"));
+		readLine(stdIn); // Throw away enter
+	}
+    
+    private void setVersion(int version) {
+    	this.version = version;
+		try {
+			PrintWriter writer = new PrintWriter("version.txt", "UTF-8");
+	    	writer.print(version);
+	    	writer.close();
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {}
+	}
+    
+    private int getVersion() {
+		return version;
+	}
+	
+	private void checkVersion() {
+		System.out.println("Användaren vill kolla om den ska uppdateras.");
+		out.println("U");
+		out.println(getVersion());
+		String response = readLine(in);
+		switch (response.trim()) {
+		case STATUS_OK:
+			return;
+		case STATUS_UPDATE:
+			String action = readLine(in);
+			if (action.trim().equalsIgnoreCase(STATUS_LANGUAGE)) {
+				updateLanguageFiles();
+			} else {
+				// TODO Error handling
+			}
+			break;
+		default:
+			// TODO Error
+			break;
+		}
+		int version = Integer.parseInt(readLine(in));
+		setVersion(version);
+	}
+	
+	private void updateLanguageFiles() {
+		while (true) {
+			String type = readLine(in);
+			if (type.equals(STATUS_END)) 
+				break;
+			String fileName = readLine(in);
+			String len = readLine(in);
+			int length = Integer.parseInt(len.trim());
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < length; i++) {
+				sb.append(readLine(in));
+				sb.append("\n");
+			}
+			String file = sb.toString();
+	    	PrintWriter writer;
+			try {
+				writer = new PrintWriter("" + fileName, "UTF-8");
+		    	writer.print(file);
+		    	writer.close();
+			} catch (FileNotFoundException | UnsupportedEncodingException e) {System.out.println(e.getMessage());System.exit(1);} // TODO Error handling
+			readLine(in); // Tomrad
+			readLine(in); // EOF
+		}
+		try {
+			t.update();
+		} catch (IOException e) {/* TODO ERROR */}
+	}
+}   

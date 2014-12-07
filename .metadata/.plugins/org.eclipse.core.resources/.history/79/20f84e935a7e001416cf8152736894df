@@ -1,0 +1,8 @@
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+
+public class Handler {
+	public Handler(BufferedReader in, PrintWriter out) {
+		
+	}
+}

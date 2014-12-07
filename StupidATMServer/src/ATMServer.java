@@ -4,16 +4,14 @@ import java.text.DateFormat;
 import java.util.Date;
 
 /**
- * The server class of the ATM system. TODO Complete description
+ * The server class of the ATM system.
  * @author Jonas Dahl & Nick Nyman
  * @version 1.0
  * @date 2014-11-28
 */
 public class ATMServer {
-	/**
-	 * The port number we use for this server.
-	 */
-    private static int portNumber = 8989; // TODO On launch. Fix so we take it as argument, but this is good for testing.
+	/** The port number we use for this server. */
+    private static int portNumber;
     
     /**
      * The main function. Starts listening for new clients and starts one thread 
@@ -24,6 +22,18 @@ public class ATMServer {
      * @throws IOException if server socket error occurs when accepting
      */
     public static void main(String[] args) throws IOException {
+		if (args.length != 1) {
+			System.out.println("Usage: ATMServer [port]");
+			System.out.println("The port is to the clients.");
+			System.exit(1);
+		}
+		try {
+			portNumber = Integer.parseInt(args[0]);
+		} catch (NumberFormatException e) {
+			System.out.println("Invalid port number.");
+			System.exit(1);
+		}
+		
     	ServerSocket serverSocket = null;
         try {
         	serverSocket = new ServerSocket(portNumber);
@@ -34,16 +44,19 @@ public class ATMServer {
             System.exit(1);
         }
         
-        // One turn in the loop for each client, that starts a new thread.
-        while (true) {
+        // One turn in the loop for each client, which starts a new thread.
+        boolean loop = true;
+        while (loop) {
         	new ATMServerThread(serverSocket.accept()).start();
         	log("New client connected.");
         }
+        // When know we won't reach this, but for the sake of Eclipse, we have it!
+        serverSocket.close();
     }
     
     /**
-     * Prints the parameter to stdout.
-     * @prints the parameter to stdout
+     * Prints the parameter to stdout, together with the time when received.
+     * @prints the parameter to stdout, together with the time when received
      * @param logStr the string to be logged to stdout, with timestamp
      */
     public static void log(String logStr) {
