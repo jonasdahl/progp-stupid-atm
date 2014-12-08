@@ -50,12 +50,12 @@ public class ATMServer {
         	new ATMServerThread(serverSocket.accept()).start();
         	log("New client connected.");
         }
-        // When know we won't reach this, but for the sake of Eclipse, we have it!
+        // We know we won't reach this, but for the sake of Eclipse, we have it!
         serverSocket.close();
     }
     
     /**
-     * Prints the parameter to stdout, together with the time when received.
+     * Keeps a log of activities and events on standard output.
      * @prints the parameter to stdout, together with the time when received
      * @param logStr the string to be logged to stdout, with timestamp
      */
