@@ -238,24 +238,30 @@ public class ATMClient {
 		String cardNumber = readLine(stdIn);
 		System.out.print(t.t("pincode") + ": "); // Ask for pin code
 		String pinCode = readLine(stdIn);
-		out.println(C.SOCKET_LOGIN); // Send an login command for login (to
-										// server)
-		out.println(cardNumber); // Send card number
-		out.println(pinCode); // Send pin code
-		String response = readLine(in);
-		if (response.startsWith(C.ERROR)) {
-			System.out.println(t.e(response));
+		if(cardNumber.matches("[0-9]{6}") && pinCode.matches("[0-9]{4}")){
+			out.println(C.SOCKET_LOGIN); // Send an login command for login (to
+											// server)
+			out.println(cardNumber); // Send card number
+			out.println(pinCode); // Send pin code
+			String response = readLine(in);
+			if (response.startsWith(C.ERROR)) {
+				System.out.println(t.e(response));
+				enterToContinue();
+				login(); // Nytt försök
+			} else {
+				System.out.println(t.t("logged_in"));
+				enterToContinue();
+			}
+		} else {
+			System.out.println(t.t("auth_error"));
 			enterToContinue();
 			login(); // Nytt försök
-		} else {
-			System.out.println(t.t("logged_in"));
-			enterToContinue();
 		}
 	}
 
 	/**
 	 * Handles deposit.
-	 * 
+	 * NB: deposits do not need authorization as withdrawals do.
 	 * @prints to stdout: some info and questions about the deposit. to socket:
 	 *         first "D", then the code and amount
 	 * @reads from stdin: some answers on questions about the withdrawal from
@@ -291,18 +297,22 @@ public class ATMClient {
 		String code = readLine(stdIn);
 		System.out.print(t.t("amount") + ": "); // Ask for amount
 		int amountCents = (int) (grabDoubleFromText(readLine(stdIn)) * 100);
-		out.println(C.SOCKET_WITHDRAW); // Send a command for withdrawal
-		out.println(code); // Send code
-		out.println(amountCents); // Send amount
-		String response = readLine(in);
-		if (response.startsWith(C.ERROR)) {
-			System.out.println(t.e(response));
+		if (code.matches("[0-9]{2}")){
+			out.println(C.SOCKET_WITHDRAW); // Send a command for withdrawal
+			out.println(code); // Send code
+			out.println(amountCents); // Send amount
+			String response = readLine(in);
+			if (response.startsWith(C.ERROR)) {
+				System.out.println(t.e(response));
+			} else {
+				System.out.println(t.t("you_have") + " " + t.t("currency") + " "
+						+ ((double) amountCents / 100) + " " + t.t("in_cash"));
+				System.out.println(t.t("you_have") + " " + t.t("currency") + " "
+						+ ((double) Integer.parseInt(response) / 100) + " "
+						+ t.t("on_account"));
+			}
 		} else {
-			System.out.println(t.t("you_have") + " " + t.t("currency") + " "
-					+ ((double) amountCents / 100) + " " + t.t("in_cash"));
-			System.out.println(t.t("you_have") + " " + t.t("currency") + " "
-					+ ((double) Integer.parseInt(response) / 100) + " "
-					+ t.t("on_account"));
+				System.out.println(t.t("code_error"));
 		}
 	}
 

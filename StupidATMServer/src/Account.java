@@ -95,7 +95,7 @@ public class Account {
 	/**
 	 * Returns the current balance from the account.
 	 * 
-	 * @return double value of account balance, in cents (smallest possible unit
+	 * @return int value of account balance, in cents (smallest possible unit
 	 *         of currency).
 	 */
 	public int getBalance() {

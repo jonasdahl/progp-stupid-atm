@@ -1,5 +1,10 @@
-/version.txt
+/C.class
+/accounts.txt
 /enUS.lang
 /svSE.lang
+<<<<<<< HEAD
 /C.class
 /esSP.lang
+=======
+/version.txt
+>>>>>>> FETCH_HEAD
