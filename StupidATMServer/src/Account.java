@@ -23,8 +23,6 @@ public class Account {
 	private int cardNumber;
 	/** The pin code associated with the card. */
 	private int pinCode;
-	/** The actual account balance for the person. */
-	private int balance;
 	/** The possible correct codes for the user. */
 	private static ArrayList<String> authcodes;
 
@@ -36,7 +34,7 @@ public class Account {
 	 */
 	public int verifyAndLoad(String cardNo, String pinC) throws IOException {
 		try {
-			FileReader fl = new FileReader("src/accounts.txt");
+			FileReader fl = new FileReader("accounts.txt");
 			BufferedReader br = new BufferedReader(fl);
 			ATMServer.log("Database opened.");
 
@@ -55,7 +53,7 @@ public class Account {
 					name = parts[2].trim();
 					cardNumber = Integer.parseInt(parts[3].trim());
 					pinCode = Integer.parseInt(parts[4].trim());
-					balance = Integer.parseInt(parts[5].trim());
+					//balance = Integer.parseInt(parts[5].trim());
 					authcodes = new ArrayList<String>(Arrays.asList("01", "03",
 							"05", "07", "09", "11", "13", "15", "17", "19",
 							"21", "23", "25", "27", "29", "31", "33", "35",
@@ -101,7 +99,28 @@ public class Account {
 	 *         of currency).
 	 */
 	public int getBalance() {
-		return balance;
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(C.ACCOUNTS_FILE));
+			String line = br.readLine();
+			while (line != null) {
+				String[] parts = line.split("\\|");
+				if (parts.length == 6) {
+					if (parts[0].trim().equals("" + id)) {
+						br.close();
+						return Integer.parseInt(parts[5].trim());
+					}
+				}
+				ATMServer.log("Read line from accounts file: " + line);
+				line = br.readLine();
+			}
+			br.close();
+		} catch (IOException e) {
+			ATMServer.log("Database read failed:");
+			ATMServer.log(e.getMessage());
+			return -1;
+		}
+		return -1;
 	}
 
 	/**
@@ -114,9 +133,8 @@ public class Account {
 	public String deposit(int addValue) {
 		if (addValue < 0)
 			return C.ERROR_NEGATIVE;
-		this.balance = this.balance + addValue;
-		editBalance();
-		return "" + balance;
+		editBalance(addValue);
+		return "" + getBalance();
 	}
 
 	/**
@@ -124,9 +142,10 @@ public class Account {
 	 * in a StringBuilder. Edits the line that needs to be edited, and then
 	 * writes back the whole file.
 	 * 
+	 * @param diff the value of which the balance should change (-100 means remove 1 SEK from account)
 	 * @return true if it succeeds, false if it fails.
 	 */
-	private boolean editBalance() {
+	private boolean editBalance(int diff) {
 		String fileText = "";
 		BufferedReader br = null;
 		try {
@@ -139,7 +158,7 @@ public class Account {
 					if (parts[0].trim().equals("" + id)) {
 						line = id + " | " + personalID + " | " + name + " | "
 								+ cardNumber + " | " + pinCode + " | "
-								+ balance;
+								+ (Integer.parseInt(parts[5].trim()) + diff);
 					}
 				}
 				sb.append(line);
@@ -170,11 +189,10 @@ public class Account {
 	public String withdraw(int withdrawn) {
 		if (withdrawn < 0)
 			return C.ERROR_NEGATIVE;
-		if (balance < withdrawn)
+		if (getBalance() < withdrawn)
 			return C.ERROR_BROKE;
-		this.balance = this.balance - withdrawn;
-		editBalance();
-		return "" + balance;
+		editBalance(-withdrawn);
+		return "" + getBalance();
 	}
 
 	/**

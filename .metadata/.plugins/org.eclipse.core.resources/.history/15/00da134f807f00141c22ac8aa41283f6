@@ -1,0 +1,29 @@
+welcome				==> Bienvenidos a la Internet bánking! Por favor, pulse "Enter" para iniciar sesión.
+menu 				==> Las opciones actuales son:\n(1) depósito,\n(2) retirar,\n(3) muestran el saldo,\n(4) terminar,\n(5) cambiar el idioma.
+language_question	==> Por favor esbribe el idioma que quiren usar. (svSE o enUS o esSP)
+two_digit_code 		==> Por favor escribe tu código de autorización (dos dígitos).
+amount 				==> Cantidad
+unknown_host 		==> Desconocido host
+no_io 				==> No se pudo obtener de E/S para la conexión a
+card_number			==> Número de tarjeta
+pincode				==> Código pin
+logged_in			==> Ahora está en el sistema.
+you_have			==> Usted ahora tiene
+in_cash				==> en caja.
+on_account			==> en la cuenta.
+login				==> Iniciar sesión.
+withdraw			==> Retirar.
+balance				==> Saldo.
+deposit				==> Depositar una cantidad.
+enter				==> Pulse "Enter" para continuar.
+errInvNum			==> Número no válido.
+currency			==> SEK
+language_changed	==> El idioma se ha cambiado.
+error				==> Se produjo un error.
+inactive_error		==> Se produjo un error: usted ha estado inactivo durante demasiado tiempo.
+auth_error			==> Se produjo un error: número de tarjeta o código pin no válida.
+lang_error			==> Se produjo un error: ese lenguaje no es compatible.
+code_error			==> Se produjo un error: código incorrecto.
+negative_error		==> Se produjo un error: no puede utilizar valores negativos aquí.
+broke_error			==> Se produjo un error: su saldo es demasiado bajo.
+update				==> Felicidades, el cliente se ha actualizado!

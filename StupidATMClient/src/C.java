@@ -32,6 +32,6 @@ public class C {
 	
 	/** Other constants. */
 	public final static String LANGUAGE_FILE_SEPARATOR = "==>";
-	public final static String ACCOUNTS_FILE = "src/accounts.txt";
+	public final static String ACCOUNTS_FILE = "accounts.txt";
 	public final static int    TIMEOUT_TIME = 30;
 }

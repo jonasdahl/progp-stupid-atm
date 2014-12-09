@@ -246,7 +246,7 @@ public class ATMServerThread extends Thread {
 		BufferedReader br = null;
 		int serverVersion = 0;
 		try {
-			br = new BufferedReader(new FileReader("src/version.txt"));
+			br = new BufferedReader(new FileReader("version.txt"));
 			String line = br.readLine().trim();
 			br.close();
 			serverVersion = Integer.parseInt(line);
@@ -258,8 +258,7 @@ public class ATMServerThread extends Thread {
 		// There is only one case we should update on...
 		if (serverVersion <= userVersion) {
 			out.println(C.STATUS_OK);
-			ATMServer
-					.log("User doesn't need to update, sent one line on socket.");
+			ATMServer.log("User doesn't need to update, sent one line on socket.");
 			return;
 		}
 		ATMServer.log("User needs to update.");
@@ -278,7 +277,7 @@ public class ATMServerThread extends Thread {
 	 * in the same source folder.
 	 */
 	private void printLangFiles() {
-		File f = new File("src"); // Current directory
+		File f = new File("."); // Current directory
 		File[] files = f.listFiles();
 		for (File file : files) {
 			if (file.getName().matches("(.*)\\.lang")) {
@@ -301,7 +300,7 @@ public class ATMServerThread extends Thread {
 	private void printFile(String name) {
 		try {
 			BufferedReader br = new BufferedReader(
-					new FileReader("src/" + name));
+					new FileReader(name));
 			String line = null;
 			StringBuilder sb = new StringBuilder();
 			int num = 0;
